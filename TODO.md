@@ -1,0 +1,10 @@
+- [ ] Cross-compile pForth to ARM
+- [ ] Find the ARM entry point to boot pForth
+- [ ] Compile the correct ARM image
+- [ ] Boot the image in Qemu
+- [ ] Hurray!
+- [ ] Create a fernvale machine for qemu
+- [ ] Try again to boot pForth
+- [ ] Try to show something on screen
+- [ ] Double HURRAY!
+- [ ] Let's code the OS!
