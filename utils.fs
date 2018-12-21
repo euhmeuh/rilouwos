@@ -19,5 +19,5 @@
     loop
     drop
   does> ( index -- str size )
-    swap cells + @ count
+    swap cells + a@ count
 ;
