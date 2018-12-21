@@ -34,14 +34,14 @@ here
 : date.now  ( -- year month day ) 2018 12 14 ;
 
 : date.weekday  ( year month day -- day-num )
-  rot swap -rot ( d m y -- )
-  over 3 < if 1- swap 12 + swap then
-  100 /mod
-  dup 4 / swap 2* -
-  swap dup 4 / + +
-  swap 1+ 13 5 */ + +
-  ( in zeller 0=sat, so -2 for 0=mon )
-  2- 7 mod
+  swap dup
+  3 < if 12 + rot 1- -rot then
+  1+ 13 5 */ +
+  swap dup 4 /
+  swap dup 400 /
+  swap dup 100 / -
+  + + +
+  5 + 7 mod
 ;
 
 : date.day-name  ( year month day -- str size )
