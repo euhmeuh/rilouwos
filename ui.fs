@@ -24,100 +24,6 @@
 1 constant COLOR-PRIMARY
 0 constant COLOR-SECONDARY
 
-\ === Dashboard view ===
-
-\ [-----STATUSBAR-----]
-\      # ### ######
-\     ##   #*  #  #
-\      # ### ###  #
-\      #   #*  #  #
-\     ###### ###  #
-\ Wednesday, Decemb. 10
-\ John Doe
-\ Hey, whats up? I've b-
-\ een wondering if you
-\ could give me a hand
-\ on building the netwo-
-\ rk adapter for Rilouw-
-\ OS. Feel free to cont-
-\ act me when you got t-
-\ he time. Cheers!
-\
-\
-\
-\ [-------MENU--------]
-
-\ === Status bar ===
-
-: ui.status-bar  ( pos-x pos-y -- )
-  COLOR-PRIMARY -rot
-  SCREEN-TILE-W 1 draw.fill-tiles
-;
-
-\ === Big Digits ===
-
-: ui.big-digits  ( pox-x pos-y -- ) 2drop ;
-
-\ === Date line ===
-
-\ Months are cut if they pass the 18th character:
-\
-\ Monday, May 1
-\ Sunday, February 5
-\ Wednesday, January 30
-\ Wednesday, Februa. 30
-\ Wednesday, March 30
-\ Wednesday, April 30
-\ Wednesday, May 30
-\ Wednesday, June 30
-\ Wednesday, July 30
-\ Wednesday, August 30
-\ Wednesday, Septem. 30
-\ Wednesday, October 30
-\ Wednesday, Novemb. 30
-\ Wednesday, Decemb. 30
-\ Saturday, December 30
-\ Saturday, Septemb. 28
-18 constant MONTH-CHAR-LIMIT
-
-: ui.full-date  ( pox-x pos-y -- )
-  draw.cursor!
-  date.now
-  3dup date.day-name draw.text
-  s" , " draw.text
-  swap date.month-name draw.text
-  s"  " draw.text
-  int->str draw.text
-  drop
-;
-
-\ === Notifications ===
-
-\ A text line structure: 2px blank | 21 chars (229px) | 2px blank | 5px dash | 2px blank
-\ To help reading cut words, a dash is drawn at the end of cut lines
-\
-\ Notifications span from line 7 to 18 (total: 12 lines)
-\ It's easily divisible by 1, 2, 3, 4, then from 5 to 6 it's 2 lines per message
-\ Max notifications: 6
-\ Notifications from the same contact only display the latest unread message from this contact
-
-: ui.notifications  ( pox-x pos-y -- ) 2drop ;
-
-\ === Menu ===
-
-: ui.menu  ( pox-x pos-y -- )
-  COLOR-PRIMARY -rot
-  SCREEN-TILE-W 1 draw.fill-tiles
-;
-
-: ui.dashboard  ( -- )
-  0 0 ui.status-bar
-  2 1 ui.big-digits
-  0 6 ui.full-date
-  0 7 ui.notifications
-  0 19 ui.menu
-;
-
 \ Keyboard layout:
 \ Back         Up            Ok
 \ Call2  Left  Enter  Right  Tone
@@ -151,6 +57,8 @@
 '0' constant KEY.0SP
 '*' constant KEY.STAR
 
+\ === State machine ===
+
 \ User Interface:
 \ Dashboard          [Unlock     ] [Lock   Menu]
 \ - Menu             [Back     OK]
@@ -162,55 +70,147 @@
 \     - Contact      [Back   Edit] [Cancel Save]
 \   - Alarms         [Back   Edit] [Cancel Save]
 
-variable CURRENT-STATE
-: state!  ( state-xt -- ) CURRENT-STATE a! ;
+defer CURRENT-STATE
+: state!  ( state-xt -- ) is CURRENT-STATE ;
 
-: state.dashboard.locked ;
-: state.dashboard.unlock ;
-: state.dashboard ;
-: state.menu ;
+defer state.dashboard.locked
+defer state.dashboard.unlock
+defer state.dashboard
+defer state.menu
+defer state.call
+defer state.call.write
+defer state.calling.quiet
+defer state.calling.loud
+defer state.messages
+defer state.discussion
+defer state.discussion.write
+defer state.contacts
+defer state.contact
+defer state.contact.edit
+defer state.alarms
+defer state.alarms.edit
 
-: state.dashboard.locked  ( key -- )
-  KEY.BACK = if ' state.dashboard.unlock state! then
-;
+:noname  ( key -- )
+  KEY.BACK = if what's state.dashboard.unlock state! then
+; is state.dashboard.locked
 
 : ui.check-password  ( -- state-xt )
-  ' state.dashboard.unlock
+  what's state.dashboard
 ;
 
-: state.dashboard.unlock  ( key -- )
-  dup KEY.BACK = if ' state.dashboard.locked state! then
-  KEY.OK = if ' ui.check-password state! then
-;
+:noname  ( key -- )
+  dup KEY.BACK = if what's state.dashboard.locked state! then
+  KEY.OK = if ui.check-password state! then
+; is state.dashboard.unlock
 
-: state.dashboard  ( key -- )
-  dup KEY.BACK = if ' state.dashboard.locked state! then
-  KEY.OK = if ' state.menu state! then
-;
+:noname  ( key -- )
+  dup KEY.BACK = if what's state.dashboard.locked state! then
+  KEY.OK = if what's state.menu state! then
+; is state.dashboard
 
 : ui.menu-go  ( -- state-xt )
-  ' state.dashboard
+  what's state.dashboard
 ;
 
-: state.menu  ( key -- )
-  dup KEY.BACK = if ' state.dashboard state! then
-  KEY.OK = if ' ui.menu-go state! then
+:noname  ( key -- )
+  dup KEY.BACK = if what's state.dashboard state! then
+  KEY.OK = if ui.menu-go state! then
+; is state.menu
+
+what's state.dashboard.locked state!
+
+\ === Dashboard view ===
+
+\ [-----STATUSBAR-----]
+\      # ### ######
+\     ##   #*  #  #
+\      # ### ###  #
+\      #   #*  #  #
+\     ###### ###  #
+\ Wednesday, Decemb. 10
+\ John Doe
+\ Hey, whats up? I've b-
+\ een wondering if you
+\ could give me a hand
+\ on building the netwo-
+\ rk adapter for Rilouw-
+\ OS. Feel free to cont-
+\ act me when you got t-
+\ he time. Cheers!
+\
+\
+\
+\ [-------MENU--------]
+
+\ === Status bar ===
+
+: ui.status-bar  ( pos-x pos-y -- )
+  \ COLOR-PRIMARY -rot
+  \ SCREEN-TILE-W 1 draw.fill-tiles
+  2drop
+  cr ." [-----STATUSBAR-----]"
 ;
 
-: state.call ;
-: state.call.write ;
-: state.calling.quiet ;
-: state.calling.loud ;
-: state.messages ;
-: state.discussion ;
-: state.discussion.write ;
-: state.contacts ;
-: state.contact ;
-: state.contact.edit ;
-: state.alarms ;
-: state.alarms.edit ;
+\ === Big Digits ===
 
-' state.dashboard.locked state!
+: ui.big-digits  ( pox-x pos-y -- )
+  2drop
+  cr ."      # ### ######    "
+  cr ."     ##   #*  #  #    "
+  cr ."      # ### ###  #    "
+  cr ."      #   #*  #  #    "
+  cr ."     ###### ###  #    "
+;
+
+\ === Date line ===
+
+\ Months are cut if they pass the 18th character:
+\
+\ Monday, May 1
+\ Sunday, February 5
+\ Wednesday, January 30
+\ Wednesday, Februa. 30
+\ Wednesday, March 30
+\ Wednesday, April 30
+\ Wednesday, May 30
+\ Wednesday, June 30
+\ Wednesday, July 30
+\ Wednesday, August 30
+\ Wednesday, Septem. 30
+\ Wednesday, October 30
+\ Wednesday, Novemb. 30
+\ Wednesday, Decemb. 30
+\ Saturday, December 30
+\ Saturday, Septemb. 28
+18 constant MONTH-CHAR-LIMIT
+
+: ui.full-date  ( pox-x pos-y -- )
+  draw.cursor! cr
+  date.now
+  3dup date.day-name draw.text
+  s" , " draw.text
+  swap date.month-name draw.text
+  s"  " draw.text
+  int->str draw.text
+  drop
+;
+
+\ === Notifications ===
+
+\ A text line structure: 2px blank | 21 chars (229px) | 2px blank | 5px dash | 2px blank
+\ To help reading cut words, a dash is drawn at the end of cut lines
+\
+\ Notifications span from line 7 to 18 (total: 12 lines)
+\ It's easily divisible by 1, 2, 3, 4, then from 5 to 6 it's 2 lines per message
+\ Max notifications: 6
+\ Notifications from the same contact only display the latest unread message from this contact
+
+: ui.notifications  ( pox-x pos-y -- )
+  2drop
+  12 0 do cr loop
+;
+
+\ === Menu ===
 
 here
 ," "
@@ -230,51 +230,60 @@ here
 ," SAVE"
 15 csarray MENU-LABELS
 
-: ,menu  ( left right state-xt -- )  , , , ;
-
 here
-1  0  ' state.dashboard.locked ,menu
-4  1  ' state.dashboard.unlock ,menu
-2  3  ' state.dashboard        ,menu
-4  5  ' state.menu             ,menu
-4  0  ' state.call             ,menu
-6  7  ' state.call.write       ,menu
-4  8  ' state.calling.quiet    ,menu
-4  9  ' state.calling.loud     ,menu
-4  5  ' state.messages         ,menu
-4  10 ' state.discussion       ,menu
-6  11 ' state.discussion.write ,menu
-4  5  ' state.contacts         ,menu
-4  12 ' state.contact          ,menu
-13 14 ' state.contact.edit     ,menu
-4  12 ' state.alarms           ,menu
-13 14 ' state.alarms.edit      ,menu
+what's state.dashboard.locked , 1  , 0  ,
+what's state.dashboard.unlock , 4  , 1  ,
+what's state.dashboard        , 2  , 3  ,
+what's state.menu             , 4  , 5  ,
+what's state.call             , 4  , 0  ,
+what's state.call.write       , 6  , 7  ,
+what's state.calling.quiet    , 4  , 8  ,
+what's state.calling.loud     , 4  , 9  ,
+what's state.messages         , 4  , 5  ,
+what's state.discussion       , 4  , 10 ,
+what's state.discussion.write , 6  , 11 ,
+what's state.contacts         , 4  , 5  ,
+what's state.contact          , 4  , 12 ,
+what's state.contact.edit     , 13 , 14 ,
+what's state.alarms           , 4  , 12 ,
+what's state.alarms.edit      , 13 , 14 ,
 16 3 idxarray MENU-STATES
 
-: ui.menu  ( state-xt -- )
-  MENU-STATES throw
-  cell+ dup @ swap cell+ @
+: ui.menu  ( pos-x pos-y -- )
+  COLOR-PRIMARY -rot
+  SCREEN-TILE-W 1 draw.fill-tiles
+
+  what's CURRENT-STATE MENU-STATES throw
+  dup 2 idx@ swap 1 idx@
+  cr
+  ." ["
   MENU-LABELS type
   ."  -- "
   MENU-LABELS type
+  ." ]"
 ;
 
 : ui.transition  ( key -- )
-  CURRENT-STATE a@ execute
+  CURRENT-STATE
 ;
 
-: ui.render-state  ( -- )
-  CURRENT-STATE ui.menu
+: ui.render  ( -- )
+  0 0 ui.status-bar
+  2 1 ui.big-digits
+  0 6 ui.full-date
+  0 7 ui.notifications
+  0 19 ui.menu
 ;
 
 : ui.show  ( key -- )
   ui.transition
   \ COLOR-SECONDARY screen.fill
-  ui.render-state
+  ui.render
   \ screen.blit
 ;
 
 : ui.loop  ( -- )
+  ui.render
   begin
     key dup ui.show
     'q' =

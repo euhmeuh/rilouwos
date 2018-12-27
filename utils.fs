@@ -39,3 +39,5 @@
     \ otherwise: ( idx addr -- )
     dup if nip true then
 ;
+
+: idx@  ( addr idx -- value )  cells + @ ;

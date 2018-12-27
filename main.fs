@@ -30,15 +30,6 @@
 \ - call      Handle current call
 \ - message   Send a message
 \ - alarm     Check for scheduled alarms
-\
-\ Keyboard layout:
-\ Back         Up            Ok
-\ Call2  Left  Enter  Right  Tone
-\ Call1        Down          Hang
-\ 1 o_o        2 abc         3 def
-\ 4 ghi        5 jkl         6 mno
-\ 7 pqrs       8 tuv         9 wxyz
-\ #            0 _           *
 
 include utils.fs
 include build.fs
