@@ -6,7 +6,9 @@
 \ === Draw ===
 \ Rendering primitives
 
-: draw.text  ( str len pos-y pos-x -- ) ;
+: draw.cursor!  ( x y -- ) 2drop ;
 
-: draw.fill-tiles  ( tile-y tile-x tile-h tile-w -- ) ;
+: draw.text  ( str len -- ) type ;
+
+: draw.fill-tiles  ( color x y w h -- ) drop 2drop 2drop ;
 

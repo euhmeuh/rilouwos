@@ -48,5 +48,5 @@ here
   date.weekday DAY-NAMES ;
 
 : date.month-name  ( month -- str size )
-  12 mod MONTH-NAMES
+  1- 12 mod MONTH-NAMES
 ;

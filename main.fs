@@ -31,18 +31,6 @@
 \ - message   Send a message
 \ - alarm     Check for scheduled alarms
 \
-\ User Interface:
-\ Dashboard          [Unlock     ] [Lock   Menu]
-\ - Menu             [Back     OK]
-\   - Calling        [Back   Loud] [Back  Quiet]
-\   - Call           [Back    Add]
-\   - Messages       [Back     OK]
-\     - Discussion   [Back  Write] [Erase  Send]
-\   - Contacts       [Back     OK]
-\     - Contact      [Back   Edit] [Cancel Save]
-\   - Alarms         [Back     OK]
-\     - Alarm        [Back   Edit] [Cancel Save]
-\
 \ Keyboard layout:
 \ Back         Up            Ok
 \ Call2  Left  Enter  Right  Tone

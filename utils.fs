@@ -12,7 +12,7 @@
 
 : int->str  ( int -- str size ) s>d <# #s #> ;
 
-: csarray  ( here nstrings -- )
+: csarray  ( here nstrings "name" -- )
   create
     0 do
       dup a, dup c@ 1+ + aligned
@@ -21,3 +21,19 @@
   does> ( index -- str size )
     swap cells + a@ count
 ;
+
+: idxarray  ( here n size "name" -- )
+  create
+    -rot 0 do
+      swap dup a, over + aligned
+    loop
+    2drop
+    0 ,
+  does>  ( index -- addr )
+    swap
+    begin
+      2dup a@ dup 0 =
+
+    until
+;
+

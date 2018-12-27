@@ -50,12 +50,13 @@
 \ === Status bar ===
 
 : ui.status-bar  ( pos-x pos-y -- )
-  SCREEN-TILE-W 1 COLOR-PRIMARY draw.fill-tiles
+  COLOR-PRIMARY -rot
+  SCREEN-TILE-W 1 draw.fill-tiles
 ;
 
 \ === Big Digits ===
 
-: ui.big-digits  ( pox-x pos-y -- ) ;
+: ui.big-digits  ( pox-x pos-y -- ) 2drop ;
 
 \ === Date line ===
 
@@ -80,16 +81,13 @@
 18 constant MONTH-CHAR-LIMIT
 
 : ui.full-date  ( pox-x pos-y -- )
-  2>r \ save params
-
+  draw.cursor!
   date.now
-
   3dup date.day-name draw.text
   s" , " draw.text
   swap date.month-name draw.text
   s"  " draw.text
   int->str draw.text
-
   drop
 ;
 
@@ -103,12 +101,13 @@
 \ Max notifications: 6
 \ Notifications from the same contact only display the latest unread message from this contact
 
-: ui.notifications  ( pox-x pos-y -- ) ;
+: ui.notifications  ( pox-x pos-y -- ) 2drop ;
 
 \ === Menu ===
 
 : ui.menu  ( pox-x pos-y -- )
-  SCREEN-TILE-W 1 COLOR-PRIMARY draw.fill-tiles
+  COLOR-PRIMARY -rot
+  SCREEN-TILE-W 1 draw.fill-tiles
 ;
 
 : ui.dashboard  ( -- )
@@ -118,3 +117,133 @@
   0 7 ui.notifications
   0 19 ui.menu
 ;
+
+\ User Interface:
+\ Dashboard          [Unlock     ] [Lock   Menu]
+\ - Menu             [Back     OK]
+\   - Calling        [Back   Loud] [Back  Quiet]
+\   - Call           [Back       ] [Erase   Add]
+\   - Messages       [Back     OK]
+\     - Discussion   [Back  Write] [Erase  Send]
+\   - Contacts       [Back     OK]
+\     - Contact      [Back   Edit] [Cancel Save]
+\   - Alarms         [Back   Edit] [Cancel Save]
+
+'b' constant KEY.BACK
+'o' constant KEY.OK
+'i' constant KEY.UP
+'k' constant KEY.DOWN
+'j' constant KEY.LEFT
+'l' constant KEY.RIGHT
+'e' constant KEY.ENTER
+'c' constant KEY.CALL
+'v' constant KEY.CALL2
+'h' constant KEY.HANG
+'t' constant KEY.TONE
+
+variable CURRENT-STATE
+: state!  ( state-xt -- ) CURRENT-STATE a! ;
+
+: state.dashboard.locked  ( key -- )
+  KEY.BACK = if ' state.dashboard.unlock state! then
+;
+
+: state.dashboard.unlock  ( key -- )
+  dup KEY.BACK = if ' state.dashboard.locked state! then
+  KEY.OK = if ' ui.check-password state! then
+;
+
+: state.dashboard  ( key -- )
+  dup KEY.BACK = if ' state.dashboard.locked state! then
+  KEY.OK = if ' state.menu state! then
+;
+
+: state.menu  ( key -- )
+  dup KEY.BACK = if ' state.dashboard state! then
+  KEY.OK ' ui.menu-go state! then
+;
+
+: state.call ;
+: state.call.write ;
+: state.calling.quiet ;
+: state.calling.loud ;
+: state.messages ;
+: state.discussion ;
+: state.discussion.write ;
+: state.contacts ;
+: state.contact ;
+: state.contact.edit ;
+: state.alarms ;
+: state.alarms.edit ;
+
+' state.dashboard.locked state!
+
+here
+," "
+," UNLOCK"
+," LOCK"
+," MENU"
+," BACK"
+," OK"
+," ERASE"
+," ADD"
+," LOUD"
+," QUIET"
+," WRITE"
+," SEND"
+," EDIT"
+," CANCEL"
+," SAVE"
+15 csarray MENU-LABELS
+
+: ,menu  ( left right state-xt -- )  a, , , ;
+
+here
+1  0  ' state.dashboard.locked ,menu
+2  3  ' state.dashboard        ,menu
+4  5  ' state.dashboard.menu   ,menu
+4  0  ' state.call             ,menu
+6  7  ' state.call.composing   ,menu
+4  8  ' state.calling.quiet    ,menu
+4  9  ' state.calling.loud     ,menu
+4  5  ' state.messages         ,menu
+4  10 ' state.discussion       ,menu
+6  11 ' state.discussion.write ,menu
+4  5  ' state.contacts         ,menu
+4  12 ' state.contact          ,menu
+13 14 ' state.contact.edit     ,menu
+4  12 ' state.alarms           ,menu
+13 14 ' state.alarms.edit      ,menu
+15 3 idxarray MENU-STATES
+
+: ui.menu  ( state-xt -- )
+  MENU-STATES
+  dup @ MENU-LABELS swap
+  cell+ @ MENU-LABELS
+  count type
+  ."  -- "
+  count type
+;
+
+: ui.transition  ( key -- )
+  CURRENT-STATE a@ execute
+;
+
+: ui.render-state  ( -- )
+  CURRENT-STATE ui.menu
+;
+
+: ui.show  ( key -- )
+  ui.transition
+  \ COLOR-SECONDARY screen.fill
+  ui.render-state
+  \ screen.blit
+;
+
+: ui.loop  ()
+  begin
+    key dup ui.show
+    'q' =
+  until
+;
+
