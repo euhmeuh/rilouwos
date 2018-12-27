@@ -40,7 +40,7 @@
 '*' constant KEY.STAR
 
 : input.numeric-key?  ( key -- bool )
-  dup '0' >= '9' <= and
+  dup '0' >= swap '9' <= and
 ;
 
 :struct input
@@ -64,9 +64,14 @@
   over input.numeric-key?
   if
     dup s@ input-cursor
-    dup s@ input-string count drop +
-    rot swap c!
-    input.cursor+
+    over s@ input-string
+    2dup c@ <
+    if ( key input cursor string )
+      1+ + rot ( input addr key )
+      swap c! input.cursor+
+    else
+      2drop 2drop
+    then
   else 2drop then
 ;
 

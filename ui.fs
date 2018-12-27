@@ -44,9 +44,10 @@ here 4 c, 4 allot PASSWORD-INPUT s! input-string
 defer CURRENT-STATE
 : state!  ( state-xt -- ) is CURRENT-STATE ;
 
-defer state.dashboard.locked
-defer state.dashboard.unlock
-defer state.dashboard
+defer state.dash.locked
+defer state.dash.unlock
+defer state.dash.unlock.write
+defer state.dash
 defer state.menu
 defer state.call
 defer state.call.write
@@ -63,40 +64,59 @@ defer state.alarms.edit
 
 :noname  ( key -- )
   case
-    KEY.BACK of what's state.dashboard.unlock state! endof
+    KEY.BACK of what's state.dash.unlock state! endof
   endcase
-; is state.dashboard.locked
+; is state.dash.locked
 
 : ui.check-password  ( -- state-xt )
-  what's state.dashboard
+  what's state.dash
 ;
 
 :noname  ( key -- )
+  dup KEY.BACK =
+  if what's state.dash.locked state!
+  else
+    dup input.numeric-key?
+    if
+      PASSWORD-INPUT input.append
+      what's state.dash.unlock.write state!
+    then
+  then
+; is state.dash.unlock
+
+:noname  ( key -- )
+  dup
   case
-    KEY.BACK of what's state.dashboard.locked state! endof
+    KEY.BACK of
+      PASSWORD-INPUT dup input.erase
+      input.empty?
+      if what's state.dash.unlock state! then
+    endof
     KEY.OK of ui.check-password state! endof
   endcase
-; is state.dashboard.unlock
+  input.numeric-key?
+  if PASSWORD-INPUT input.append then
+; is state.dash.unlock.write
 
 :noname  ( key -- )
   case
-    KEY.BACK of what's state.dashboard.locked state! endof
+    KEY.BACK of what's state.dash.locked state! endof
     KEY.OK of what's state.menu state! endof
   endcase
-; is state.dashboard
+; is state.dash
 
 : ui.menu-go  ( -- state-xt )
-  what's state.dashboard
+  what's state.dash
 ;
 
 :noname  ( key -- )
   case
-    KEY.BACK of what's state.dashboard state! endof
+    KEY.BACK of what's state.dash state! endof
     KEY.OK of ui.menu-go state! endof
   endcase
 ; is state.menu
 
-what's state.dashboard.locked state!
+what's state.dash.locked state!
 
 \ === Dashboard view ===
 
@@ -210,23 +230,24 @@ here
 15 csarray MENU-LABELS
 
 here
-what's state.dashboard.locked , 1  , 0  ,
-what's state.dashboard.unlock , 4  , 1  ,
-what's state.dashboard        , 2  , 3  ,
-what's state.menu             , 4  , 5  ,
-what's state.call             , 4  , 0  ,
-what's state.call.write       , 6  , 7  ,
-what's state.calling.quiet    , 4  , 8  ,
-what's state.calling.loud     , 4  , 9  ,
-what's state.messages         , 4  , 5  ,
-what's state.discussion       , 4  , 10 ,
-what's state.discussion.write , 6  , 11 ,
-what's state.contacts         , 4  , 5  ,
-what's state.contact          , 4  , 12 ,
-what's state.contact.edit     , 13 , 14 ,
-what's state.alarms           , 4  , 12 ,
-what's state.alarms.edit      , 13 , 14 ,
-16 3 idxarray MENU-STATES
+what's state.dash.locked       , 1  , 0  ,
+what's state.dash.unlock       , 4  , 0  ,
+what's state.dash.unlock.write , 6  , 1  ,
+what's state.dash              , 2  , 3  ,
+what's state.menu              , 4  , 5  ,
+what's state.call              , 4  , 0  ,
+what's state.call.write        , 6  , 7  ,
+what's state.calling.quiet     , 4  , 8  ,
+what's state.calling.loud      , 4  , 9  ,
+what's state.messages          , 4  , 5  ,
+what's state.discussion        , 4  , 10 ,
+what's state.discussion.write  , 6  , 11 ,
+what's state.contacts          , 4  , 5  ,
+what's state.contact           , 4  , 12 ,
+what's state.contact.edit      , 13 , 14 ,
+what's state.alarms            , 4  , 12 ,
+what's state.alarms.edit       , 13 , 14 ,
+17 3 idxarray MENU-STATES
 
 : ui.menu  ( pos-x pos-y -- )
   COLOR-PRIMARY -rot
@@ -246,21 +267,25 @@ what's state.alarms.edit      , 13 , 14 ,
   CURRENT-STATE
 ;
 
-: ui.dashboard  ( -- )
+: ui.dash  ( -- )
   2 1 ui.big-digits
   0 6 ui.full-date
   0 7 ui.notifications
 ;
 
-: ui.unlock ( -- ) ;
+: ui.unlock ( -- )
+  PASSWORD-INPUT s@ input-string count
+  cr type
+;
 
 : ui.render  ( -- )
   0 0 ui.status-bar
   what's CURRENT-STATE
   case
-    what's state.dashboard.locked of ui.dashboard endof
-    what's state.dashboard.unlock of ui.dashboard ui.unlock endof
-    what's state.dashboard of ui.dashboard endof
+    what's state.dash.locked of ui.dash endof
+    what's state.dash.unlock of ui.dash ui.unlock endof
+    what's state.dash.unlock.write of ui.dash ui.unlock endof
+    what's state.dash of ui.dash endof
     what's state.menu of
       1 2 draw.cursor! cr s" CALLING" draw.text
       1 3 draw.cursor! cr s" CALL" draw.text
