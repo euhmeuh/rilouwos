@@ -24,16 +24,18 @@
 
 : idxarray  ( here n size "name" -- )
   create
-    -rot 0 do
-      swap dup a, over + aligned
+    -rot dup , \ save n in first position
+    0 do
+      dup a, over cells + aligned
     loop
     2drop
-    0 ,
-  does>  ( index -- addr )
-    swap
-    begin
-      2dup a@ dup 0 =
-
-    until
+  does>  ( index -- addr fail? )
+    dup @ 0 do
+      cell+
+      2dup a@ @ =
+      if a@ nip false leave then
+    loop
+    \ if found:  ( addr 0 -- )
+    \ otherwise: ( idx addr -- )
+    dup if nip true then
 ;
-

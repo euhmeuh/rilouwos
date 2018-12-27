@@ -118,6 +118,39 @@
   0 19 ui.menu
 ;
 
+\ Keyboard layout:
+\ Back         Up            Ok
+\ Call2  Left  Enter  Right  Tone
+\ Call1        Down          Hang
+\ 1 o_o        2 abc         3 def
+\ 4 ghi        5 jkl         6 mno
+\ 7 pqrs       8 tuv         9 wxyz
+\ #            0 _           *
+
+'b' constant KEY.BACK
+'o' constant KEY.OK
+'i' constant KEY.UP
+'k' constant KEY.DOWN
+'j' constant KEY.LEFT
+'l' constant KEY.RIGHT
+'e' constant KEY.ENTER
+'c' constant KEY.CALL1
+'v' constant KEY.CALL2
+'h' constant KEY.HANG
+'t' constant KEY.TONE
+'1' constant KEY.1REC
+'2' constant KEY.2ABC
+'3' constant KEY.3DEF
+'4' constant KEY.4GHI
+'5' constant KEY.5JKL
+'6' constant KEY.6MNO
+'7' constant KEY.7PQRS
+'8' constant KEY.8TUV
+'9' constant KEY.9WXYZ
+'#' constant KEY.HASH
+'0' constant KEY.0SP
+'*' constant KEY.STAR
+
 \ User Interface:
 \ Dashboard          [Unlock     ] [Lock   Menu]
 \ - Menu             [Back     OK]
@@ -129,23 +162,20 @@
 \     - Contact      [Back   Edit] [Cancel Save]
 \   - Alarms         [Back   Edit] [Cancel Save]
 
-'b' constant KEY.BACK
-'o' constant KEY.OK
-'i' constant KEY.UP
-'k' constant KEY.DOWN
-'j' constant KEY.LEFT
-'l' constant KEY.RIGHT
-'e' constant KEY.ENTER
-'c' constant KEY.CALL
-'v' constant KEY.CALL2
-'h' constant KEY.HANG
-'t' constant KEY.TONE
-
 variable CURRENT-STATE
 : state!  ( state-xt -- ) CURRENT-STATE a! ;
 
+: state.dashboard.locked ;
+: state.dashboard.unlock ;
+: state.dashboard ;
+: state.menu ;
+
 : state.dashboard.locked  ( key -- )
   KEY.BACK = if ' state.dashboard.unlock state! then
+;
+
+: ui.check-password  ( -- state-xt )
+  ' state.dashboard.unlock
 ;
 
 : state.dashboard.unlock  ( key -- )
@@ -158,9 +188,13 @@ variable CURRENT-STATE
   KEY.OK = if ' state.menu state! then
 ;
 
+: ui.menu-go  ( -- state-xt )
+  ' state.dashboard
+;
+
 : state.menu  ( key -- )
   dup KEY.BACK = if ' state.dashboard state! then
-  KEY.OK ' ui.menu-go state! then
+  KEY.OK = if ' ui.menu-go state! then
 ;
 
 : state.call ;
@@ -196,14 +230,15 @@ here
 ," SAVE"
 15 csarray MENU-LABELS
 
-: ,menu  ( left right state-xt -- )  a, , , ;
+: ,menu  ( left right state-xt -- )  , , , ;
 
 here
 1  0  ' state.dashboard.locked ,menu
+4  1  ' state.dashboard.unlock ,menu
 2  3  ' state.dashboard        ,menu
-4  5  ' state.dashboard.menu   ,menu
+4  5  ' state.menu             ,menu
 4  0  ' state.call             ,menu
-6  7  ' state.call.composing   ,menu
+6  7  ' state.call.write       ,menu
 4  8  ' state.calling.quiet    ,menu
 4  9  ' state.calling.loud     ,menu
 4  5  ' state.messages         ,menu
@@ -214,15 +249,14 @@ here
 13 14 ' state.contact.edit     ,menu
 4  12 ' state.alarms           ,menu
 13 14 ' state.alarms.edit      ,menu
-15 3 idxarray MENU-STATES
+16 3 idxarray MENU-STATES
 
 : ui.menu  ( state-xt -- )
-  MENU-STATES
-  dup @ MENU-LABELS swap
-  cell+ @ MENU-LABELS
-  count type
+  MENU-STATES throw
+  cell+ dup @ swap cell+ @
+  MENU-LABELS type
   ."  -- "
-  count type
+  MENU-LABELS type
 ;
 
 : ui.transition  ( key -- )
@@ -240,7 +274,7 @@ here
   \ screen.blit
 ;
 
-: ui.loop  ()
+: ui.loop  ( -- )
   begin
     key dup ui.show
     'q' =
