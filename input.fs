@@ -48,6 +48,11 @@
   rptr input-string
 ;struct
 
+: input.count  ( input -- addr len )
+  dup s@ input-string 1+ swap
+  s@ input-cursor
+;
+
 : input.empty?  ( input -- bool ) s@ input-cursor 0= ;
 
 : input.cursor+  ( input -- )

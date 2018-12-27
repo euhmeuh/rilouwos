@@ -274,7 +274,7 @@ what's state.alarms.edit       , 13 , 14 ,
 ;
 
 : ui.unlock ( -- )
-  PASSWORD-INPUT s@ input-string count
+  PASSWORD-INPUT input.count
   cr type
 ;
 
