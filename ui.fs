@@ -91,7 +91,9 @@ defer state.alarms
 defer state.alarms.edit
 
 :noname  ( key -- )
-  KEY.BACK = if what's state.dashboard.unlock state! then
+  case
+    KEY.BACK of what's state.dashboard.unlock state! endof
+  endcase
 ; is state.dashboard.locked
 
 : ui.check-password  ( -- state-xt )
@@ -99,13 +101,17 @@ defer state.alarms.edit
 ;
 
 :noname  ( key -- )
-  dup KEY.BACK = if what's state.dashboard.locked state! then
-  KEY.OK = if ui.check-password state! then
+  case
+    KEY.BACK of what's state.dashboard.locked state! endof
+    KEY.OK of ui.check-password state! endof
+  endcase
 ; is state.dashboard.unlock
 
 :noname  ( key -- )
-  dup KEY.BACK = if what's state.dashboard.locked state! then
-  KEY.OK = if what's state.menu state! then
+  case
+    KEY.BACK of what's state.dashboard.locked state! endof
+    KEY.OK of what's state.menu state! endof
+  endcase
 ; is state.dashboard
 
 : ui.menu-go  ( -- state-xt )
@@ -113,8 +119,10 @@ defer state.alarms.edit
 ;
 
 :noname  ( key -- )
-  dup KEY.BACK = if what's state.dashboard state! then
-  KEY.OK = if ui.menu-go state! then
+  case
+    KEY.BACK of what's state.dashboard state! endof
+    KEY.OK of ui.menu-go state! endof
+  endcase
 ; is state.menu
 
 what's state.dashboard.locked state!
@@ -267,23 +275,30 @@ what's state.alarms.edit      , 13 , 14 ,
   CURRENT-STATE
 ;
 
+: ui.dashboard  ( -- )
+  2 1 ui.big-digits
+  0 6 ui.full-date
+  0 7 ui.notifications
+;
+
+: ui.unlock ( -- ) ;
+
 : ui.render  ( -- )
   0 0 ui.status-bar
   what's CURRENT-STATE
-  dup what's state.dashboard.locked =
-  dup what's state.dashboard = or if
-    2 1 ui.big-digits
-    0 6 ui.full-date
-    0 7 ui.notifications
-  then
-  what's state.menu = if
-    1 2 draw.cursor! cr s" CALLING" draw.text
-    1 3 draw.cursor! cr s" CALL" draw.text
-    1 4 draw.cursor! cr s" MESSAGES" draw.text
-    1 5 draw.cursor! cr s" CONTACTS" draw.text
-    1 6 draw.cursor! cr s" ALARMS" draw.text
-    1 7 draw.cursor! cr s" SETTINGS" draw.text
-  then
+  case
+    what's state.dashboard.locked of ui.dashboard endof
+    what's state.dashboard.unlock of ui.dashboard ui.unlock endof
+    what's state.dashboard of ui.dashboard endof
+    what's state.menu of
+      1 2 draw.cursor! cr s" CALLING" draw.text
+      1 3 draw.cursor! cr s" CALL" draw.text
+      1 4 draw.cursor! cr s" MESSAGES" draw.text
+      1 5 draw.cursor! cr s" CONTACTS" draw.text
+      1 6 draw.cursor! cr s" ALARMS" draw.text
+      1 7 draw.cursor! cr s" SETTINGS" draw.text
+    endof
+  endcase
   0 19 ui.menu
 ;
 
