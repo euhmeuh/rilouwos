@@ -269,9 +269,21 @@ what's state.alarms.edit      , 13 , 14 ,
 
 : ui.render  ( -- )
   0 0 ui.status-bar
-  2 1 ui.big-digits
-  0 6 ui.full-date
-  0 7 ui.notifications
+  what's CURRENT-STATE
+  dup what's state.dashboard.locked =
+  dup what's state.dashboard = or if
+    2 1 ui.big-digits
+    0 6 ui.full-date
+    0 7 ui.notifications
+  then
+  what's state.menu = if
+    1 2 draw.cursor! cr s" CALLING" draw.text
+    1 3 draw.cursor! cr s" CALL" draw.text
+    1 4 draw.cursor! cr s" MESSAGES" draw.text
+    1 5 draw.cursor! cr s" CONTACTS" draw.text
+    1 6 draw.cursor! cr s" ALARMS" draw.text
+    1 7 draw.cursor! cr s" SETTINGS" draw.text
+  then
   0 19 ui.menu
 ;
 
