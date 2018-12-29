@@ -35,6 +35,7 @@ include utils.fs
 include build.fs
 include date.fs
 include draw.fs
+include input.fs
 include ui.fs
 
 500000 CODE-SIZE !

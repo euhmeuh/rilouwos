@@ -24,38 +24,9 @@
 1 constant COLOR-PRIMARY
 0 constant COLOR-SECONDARY
 
-\ Keyboard layout:
-\ Back         Up            Ok
-\ Call2  Left  Enter  Right  Tone
-\ Call1        Down          Hang
-\ 1 o_o        2 abc         3 def
-\ 4 ghi        5 jkl         6 mno
-\ 7 pqrs       8 tuv         9 wxyz
-\ #            0 _           *
-
-'b' constant KEY.BACK
-'o' constant KEY.OK
-'i' constant KEY.UP
-'k' constant KEY.DOWN
-'j' constant KEY.LEFT
-'l' constant KEY.RIGHT
-'e' constant KEY.ENTER
-'c' constant KEY.CALL1
-'v' constant KEY.CALL2
-'h' constant KEY.HANG
-'t' constant KEY.TONE
-'1' constant KEY.1REC
-'2' constant KEY.2ABC
-'3' constant KEY.3DEF
-'4' constant KEY.4GHI
-'5' constant KEY.5JKL
-'6' constant KEY.6MNO
-'7' constant KEY.7PQRS
-'8' constant KEY.8TUV
-'9' constant KEY.9WXYZ
-'#' constant KEY.HASH
-'0' constant KEY.0SP
-'*' constant KEY.STAR
+input PASSWORD-INPUT
+0 PASSWORD-INPUT s! input-cursor
+here 4 c, 4 allot PASSWORD-INPUT s! input-string
 
 \ === State machine ===
 
