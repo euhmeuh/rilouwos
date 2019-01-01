@@ -55,6 +55,10 @@
 
 : input.empty?  ( input -- bool ) s@ input-cursor 0= ;
 
+: input.reset  ( input -- )
+  0 swap s! input-cursor
+;
+
 : input.cursor+  ( input -- )
   dup s@ input-cursor 1+
   swap s! input-cursor

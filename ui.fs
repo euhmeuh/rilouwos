@@ -24,6 +24,8 @@
 1 constant COLOR-PRIMARY
 0 constant COLOR-SECONDARY
 
+create SETTINGS.PASSWORD ," 1234"
+
 input PASSWORD-INPUT
 0 PASSWORD-INPUT s! input-cursor
 here 4 c, 4 allot PASSWORD-INPUT s! input-string
@@ -69,18 +71,24 @@ defer state.alarms.edit
 ; is state.dash.locked
 
 : ui.check-password  ( -- state-xt )
-  what's state.dash
+  SETTINGS.PASSWORD count
+  PASSWORD-INPUT input.count
+  compare 0=
+  if what's state.dash
+  else what's state.dash.locked
+  then
+  PASSWORD-INPUT input.reset
 ;
 
 :noname  ( key -- )
   dup KEY.BACK =
-  if what's state.dash.locked state!
+  if what's state.dash.locked state! drop
   else
     dup input.numeric-key?
     if
       PASSWORD-INPUT input.append
       what's state.dash.unlock.write state!
-    then
+    else drop then
   then
 ; is state.dash.unlock
 
@@ -94,8 +102,8 @@ defer state.alarms.edit
     endof
     KEY.OK of ui.check-password state! endof
   endcase
-  input.numeric-key?
-  if PASSWORD-INPUT input.append then
+  dup input.numeric-key?
+  if PASSWORD-INPUT input.append else drop then
 ; is state.dash.unlock.write
 
 :noname  ( key -- )
