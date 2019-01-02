@@ -30,6 +30,17 @@ input PASSWORD-INPUT
 0 PASSWORD-INPUT s! input-cursor
 here 4 c, 4 allot PASSWORD-INPUT s! input-string
 
+here
+," CALL"
+," MESSAGES"
+," CONTACTS"
+," ALARMS"
+4 csarray MAIN-MENU-ITEMS
+
+menu MAIN-MENU
+4 MAIN-MENU s! menu-size
+' MAIN-MENU-ITEMS >body MAIN-MENU s! menu-strings
+
 \ === State machine ===
 
 \ User Interface:
@@ -113,14 +124,12 @@ defer state.alarms.edit
   endcase
 ; is state.dash
 
-: ui.menu-go  ( -- state-xt )
-  what's state.dash
-;
-
 :noname  ( key -- )
   case
     KEY.BACK of what's state.dash state! endof
-    KEY.OK of ui.menu-go state! endof
+    KEY.OK of MAIN-MENU menu.go state! endof
+    KEY.UP of MAIN-MENU menu.cursor- endof
+    KEY.DOWN of MAIN-MENU menu.cursor+ endof
   endcase
 ; is state.menu
 
@@ -294,14 +303,7 @@ what's state.alarms.edit       , 13 , 14 ,
     what's state.dash.unlock of ui.dash ui.unlock endof
     what's state.dash.unlock.write of ui.dash ui.unlock endof
     what's state.dash of ui.dash endof
-    what's state.menu of
-      1 2 draw.cursor! cr s" CALLING" draw.text
-      1 3 draw.cursor! cr s" CALL" draw.text
-      1 4 draw.cursor! cr s" MESSAGES" draw.text
-      1 5 draw.cursor! cr s" CONTACTS" draw.text
-      1 6 draw.cursor! cr s" ALARMS" draw.text
-      1 7 draw.cursor! cr s" SETTINGS" draw.text
-    endof
+    what's state.menu of MAIN-MENU menu.show endof
   endcase
   0 19 ui.menu
 ;
