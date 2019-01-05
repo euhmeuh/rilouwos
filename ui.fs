@@ -24,11 +24,18 @@
 1 constant COLOR-PRIMARY
 0 constant COLOR-SECONDARY
 
+4 constant PASSWORD-LEN
+10 constant NUMBER-LEN
+
 create SETTINGS.PASSWORD ," 1234"
 
 input PASSWORD-INPUT
 0 PASSWORD-INPUT s! input-cursor
-here 4 c, 4 allot PASSWORD-INPUT s! input-string
+here PASSWORD-LEN c, PASSWORD-LEN allot PASSWORD-INPUT s! input-string
+
+input NUMBER-INPUT
+0 NUMBER-INPUT s! input-cursor
+here NUMBER-LEN c, NUMBER-LEN allot NUMBER-INPUT s! input-string
 
 menu MAIN-MENU
 
@@ -55,7 +62,7 @@ defer state.dash
 defer state.menu
 defer state.call
 defer state.call.write
-defer state.calling.quiet
+defer state.calling
 defer state.calling.loud
 defer state.messages
 defer state.discussion
@@ -89,29 +96,30 @@ defer state.alarms.edit
 ;
 
 :defer state.dash.unlock  ( key -- )
-  dup KEY.BACK =
-  if what's state.dash.locked state! drop
+  dup input.numeric-key?
+  if
+    PASSWORD-INPUT input.append
+    what's state.dash.unlock.write state!
   else
-    dup input.numeric-key?
-    if
-      PASSWORD-INPUT input.append
-      what's state.dash.unlock.write state!
-    else drop then
+    case
+      KEY.BACK of what's state.dash.locked state! endof
+    endcase
   then
 ;
 
 :defer state.dash.unlock.write  ( key -- )
-  dup
-  case
-    KEY.BACK of
-      PASSWORD-INPUT dup input.erase
-      input.empty?
-      if what's state.dash.unlock state! then
-    endof
-    KEY.OK of ui.check-password state! endof
-  endcase
   dup input.numeric-key?
-  if PASSWORD-INPUT input.append else drop then
+  if PASSWORD-INPUT input.append
+  else
+    case
+      KEY.BACK of
+        PASSWORD-INPUT dup input.erase
+        input.empty?
+        if what's state.dash.unlock state! then
+      endof
+      KEY.OK of ui.check-password state! endof
+    endcase
+  then
 ;
 
 :defer state.dash  ( key -- )
@@ -131,6 +139,33 @@ defer state.alarms.edit
 ;
 
 :defer state.call  ( key -- )
+  dup input.numeric-key?
+  if
+    NUMBER-INPUT input.append
+    what's state.call.write state!
+  else
+    case
+      KEY.BACK of what's state.menu state! endof
+    endcase
+  then
+;
+
+:defer state.call.write  ( key -- )
+  dup input.numeric-key?
+  if NUMBER-INPUT input.append
+  else
+    case
+      KEY.BACK of
+        NUMBER-INPUT dup input.erase
+        input.empty?
+        if what's state.call state! then
+      endof
+      KEY.OK of what's state.calling state! endof
+    endcase
+  then
+;
+
+:defer state.calling  ( key -- )
   case
     KEY.BACK of what's state.menu state! endof
   endcase
@@ -289,7 +324,7 @@ what's state.dash              , 2  , 3  ,
 what's state.menu              , 4  , 5  ,
 what's state.call              , 4  , 0  ,
 what's state.call.write        , 6  , 7  ,
-what's state.calling.quiet     , 4  , 8  ,
+what's state.calling           , 4  , 8  ,
 what's state.calling.loud      , 4  , 9  ,
 what's state.messages          , 4  , 5  ,
 what's state.discussion        , 4  , 10 ,
@@ -325,9 +360,29 @@ what's state.alarms.edit       , 13 , 14 ,
   0 7 ui.notifications
 ;
 
-: ui.unlock ( -- )
-  PASSWORD-INPUT input.count
-  cr type
+: ui.unlock  ( -- )
+  PASSWORD-INPUT input.count cr type
+;
+
+: ui.call  ( -- )
+  NUMBER-INPUT input.count cr type
+;
+
+: ui.calling  ( -- )
+  cr ." Calling "
+  NUMBER-INPUT input.count type
+;
+
+: ui.messages  ( -- )
+  cr ." No messages"
+;
+
+: ui.contacts  ( -- )
+  cr ." No contacts"
+;
+
+: ui.alarms  ( -- )
+  cr ." No alarms"
 ;
 
 : ui.render  ( -- )
@@ -339,6 +394,12 @@ what's state.alarms.edit       , 13 , 14 ,
     what's state.dash.unlock.write of ui.dash ui.unlock endof
     what's state.dash of ui.dash endof
     what's state.menu of MAIN-MENU menu.show endof
+    what's state.call of ui.call endof
+    what's state.call.write of ui.call endof
+    what's state.calling of ui.calling endof
+    what's state.messages of ui.messages endof
+    what's state.contacts of ui.contacts endof
+    what's state.alarms of ui.dash ui.alarms endof
   endcase
   0 19 ui.menu
 ;
