@@ -12,35 +12,47 @@
 
 : int->str  ( int -- str size ) s>d <# #s #> ;
 
-: (csarray)  ( index csarray -- str size )
-  swap cells + a@ count
+: idx  ( addr idx -- addr ) cells + ;
+: idx@  ( addr idx -- value )  idx @ ;
+
+\ Counted strings array
+
+: (cs-array)  ( index csarray -- str size )
+  swap idx a@ count
 ;
 
-: csarray  ( here nstrings "name" -- )
+: cs-array  ( here #strings "name" -- )
   create
     0 do
       dup a, dup c@ 1+ + aligned
     loop
     drop
-  does> (csarray)
+  does> (cs-array)
 ;
 
-: idxarray  ( here n size "name" -- )
+\ Address array
+
+: array-idx  ( index addr-array -- addr )
+  2dup @ >= if abort" Index out of bound in addr-array" then
+  cell+ swap idx a@
+;
+
+: array-find  ( value addr-array -- addr fail? )
+  dup @ 0 do
+    cell+
+    2dup a@ @ =
+    if a@ nip false leave then
+  loop
+  \ if found:  ( addr 0 -- )
+  \ otherwise: ( idx addr -- )
+  dup if nip true then
+;
+
+: addr-array  ( here n size "name" -- )
   create
-    -rot dup , \ save n in first position
+    -rot dup , \ save n
     0 do
       dup a, over cells + aligned
     loop
     2drop
-  does>  ( index -- addr fail? )
-    dup @ 0 do
-      cell+
-      2dup a@ @ =
-      if a@ nip false leave then
-    loop
-    \ if found:  ( addr 0 -- )
-    \ otherwise: ( idx addr -- )
-    dup if nip true then
 ;
-
-: idx@  ( addr idx -- value )  cells + @ ;

@@ -1,14 +1,16 @@
 DICNAME = rilouwos.dic
+PFORTHDIR = ./pforth
+PFORTH = $(PFORTHDIR)/pforth -d$(PFORTHDIR)/pforth.dic
 
 .PHONY: all test clean %.fs
 
 $(DICNAME): %.fs
-	pforth main.fs
+	$(PFORTH) main.fs
 
 all: $(DICNAME)
 
 test:
-	pforth -d $(DICNAME)
+	$(PFORTH) -d $(DICNAME)
 
 clean:
 	rm -f $(DICNAME)

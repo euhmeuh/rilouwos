@@ -30,16 +30,7 @@ input PASSWORD-INPUT
 0 PASSWORD-INPUT s! input-cursor
 here 4 c, 4 allot PASSWORD-INPUT s! input-string
 
-here
-," CALL"
-," MESSAGES"
-," CONTACTS"
-," ALARMS"
-4 csarray MAIN-MENU-ITEMS
-
 menu MAIN-MENU
-4 MAIN-MENU s! menu-size
-' MAIN-MENU-ITEMS >body MAIN-MENU s! menu-strings
 
 \ === State machine ===
 
@@ -75,11 +66,17 @@ defer state.contact.edit
 defer state.alarms
 defer state.alarms.edit
 
-:noname  ( key -- )
+\ Small macro to ease definition of defer
+\ Instead of      :noname ... ; is name
+\ you can write   :defer name ... ;
+: :defer align here code> postpone is ] ;
+
+
+:defer state.dash.locked  ( key -- )
   case
     KEY.BACK of what's state.dash.unlock state! endof
   endcase
-; is state.dash.locked
+;
 
 : ui.check-password  ( -- state-xt )
   SETTINGS.PASSWORD count
@@ -91,7 +88,7 @@ defer state.alarms.edit
   PASSWORD-INPUT input.reset
 ;
 
-:noname  ( key -- )
+:defer state.dash.unlock  ( key -- )
   dup KEY.BACK =
   if what's state.dash.locked state! drop
   else
@@ -101,9 +98,9 @@ defer state.alarms.edit
       what's state.dash.unlock.write state!
     else drop then
   then
-; is state.dash.unlock
+;
 
-:noname  ( key -- )
+:defer state.dash.unlock.write  ( key -- )
   dup
   case
     KEY.BACK of
@@ -115,25 +112,63 @@ defer state.alarms.edit
   endcase
   dup input.numeric-key?
   if PASSWORD-INPUT input.append else drop then
-; is state.dash.unlock.write
+;
 
-:noname  ( key -- )
+:defer state.dash  ( key -- )
   case
     KEY.BACK of what's state.dash.locked state! endof
     KEY.OK of what's state.menu state! endof
   endcase
-; is state.dash
+;
 
-:noname  ( key -- )
+:defer state.menu  ( key -- )
   case
     KEY.BACK of what's state.dash state! endof
     KEY.OK of MAIN-MENU menu.go state! endof
     KEY.UP of MAIN-MENU menu.cursor- endof
     KEY.DOWN of MAIN-MENU menu.cursor+ endof
   endcase
-; is state.menu
+;
+
+:defer state.call  ( key -- )
+  case
+    KEY.BACK of what's state.menu state! endof
+  endcase
+;
+
+:defer state.messages  ( key -- )
+  case
+    KEY.BACK of what's state.menu state! endof
+  endcase
+;
+
+:defer state.contacts  ( key -- )
+  case
+    KEY.BACK of what's state.menu state! endof
+  endcase
+;
+
+:defer state.alarms  ( key -- )
+  case
+    KEY.BACK of what's state.menu state! endof
+  endcase
+;
 
 what's state.dash.locked state!
+
+\ === Main menu ===
+
+here
+\ 1 CELL                \ 3 CELLS
+what's state.call     , ," CALL       "
+what's state.messages , ," MESSAGES   "
+what's state.contacts , ," CONTACTS   "
+what's state.alarms   , ," ALARMS     "
+4 4 addr-array MAIN-MENU-ITEMS
+
+0 MAIN-MENU s! menu-cursor
+4 MAIN-MENU s! menu-size
+MAIN-MENU-ITEMS MAIN-MENU s! menu-items
 
 \ === Dashboard view ===
 
@@ -244,7 +279,7 @@ here
 ," EDIT"
 ," CANCEL"
 ," SAVE"
-15 csarray MENU-LABELS
+15 cs-array MENU-LABELS
 
 here
 what's state.dash.locked       , 1  , 0  ,
@@ -264,13 +299,13 @@ what's state.contact           , 4  , 12 ,
 what's state.contact.edit      , 13 , 14 ,
 what's state.alarms            , 4  , 12 ,
 what's state.alarms.edit       , 13 , 14 ,
-17 3 idxarray MENU-STATES
+17 3 addr-array MENU-STATES
 
 : ui.menu  ( pos-x pos-y -- )
   COLOR-PRIMARY -rot
   SCREEN-TILE-W 1 draw.fill-tiles
 
-  what's CURRENT-STATE MENU-STATES throw
+  what's CURRENT-STATE MENU-STATES array-find throw
   dup 2 idx@ swap 1 idx@
   cr
   ." ["

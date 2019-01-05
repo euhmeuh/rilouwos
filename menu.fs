@@ -9,10 +9,10 @@
 :struct menu
   ushort menu-cursor
   ushort menu-size
-  rptr   menu-strings
+  rptr   menu-items
 ;struct
 
-: menu.cursor+  { a-menu  -- }
+: menu.cursor+  { a-menu -- }
   a-menu s@ menu-cursor 1+
   a-menu s@ menu-size mod
   a-menu s! menu-cursor
@@ -30,12 +30,15 @@
     cr
     dup s@ menu-cursor i =
     if ." > " then
-    i over s@ menu-strings (csarray) type
+    i over s@ menu-items array-idx
+    1 idx $type
   loop
   drop
 ;
 
 : menu.go  ( menu -- defer )
-  drop
+  dup s@ menu-cursor swap
+  s@ menu-items array-idx
+  0 idx@
 ;
 

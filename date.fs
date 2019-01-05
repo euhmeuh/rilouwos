@@ -14,7 +14,7 @@ here
 ," Friday"
 ," Saturday"
 ," Sunday"
-7 csarray DAY-NAMES
+7 cs-array DAY-NAMES
 
 here
 ," January"
@@ -29,7 +29,7 @@ here
 ," October"
 ," November"
 ," December"
-12 csarray MONTH-NAMES
+12 cs-array MONTH-NAMES
 
 : date.now  ( -- year month day ) 2018 12 14 ;
 
