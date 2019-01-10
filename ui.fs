@@ -25,19 +25,38 @@
 0 constant COLOR-SECONDARY
 
 4 constant PASSWORD-LEN
-10 constant NUMBER-LEN
+21 constant NUMBER-LEN
+
+\ === Data that should move to some kind of storage ===
 
 create SETTINGS.PASSWORD ," 1234"
 
 input PASSWORD-INPUT
-0 PASSWORD-INPUT s! input-cursor
-here PASSWORD-LEN c, PASSWORD-LEN allot PASSWORD-INPUT s! input-string
+PASSWORD-LEN PASSWORD-INPUT input.allot
 
 input NUMBER-INPUT
-0 NUMBER-INPUT s! input-cursor
-here NUMBER-LEN c, NUMBER-LEN allot NUMBER-INPUT s! input-string
+CONTACT-NUMBER-LEN NUMBER-INPUT input.allot
 
-menu MAIN-MENU
+here
+4 ,
+%00000001 ,
+," Clara"       4 cells allot
+," <3"          5 cells allot
+," 0123456789"  3 cells allot
+%00000001 ,
+," Pierre"        4 cells allot
+," Bro"           5 cells allot
+," 0246801357"    3 cells allot
+%00000001 ,
+," Simon"       4 cells allot
+," Best friend" 3 cells allot
+," 0864297531"  3 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +33628406957" 2 cells allot
+252 CONTACT-LEN * allot \ free space
+relative CONTACT-LIST
 
 \ === State machine ===
 
@@ -51,6 +70,8 @@ menu MAIN-MENU
 \   - Contacts       [Back     OK]
 \     - Contact      [Back   Edit] [Cancel Save]
 \   - Alarms         [Back   Edit] [Cancel Save]
+
+menu MAIN-MENU
 
 defer CURRENT-STATE
 : state!  ( state-xt -- ) is CURRENT-STATE ;
@@ -160,7 +181,7 @@ defer state.alarms.edit
         input.empty?
         if what's state.call state! then
       endof
-      KEY.OK of what's state.calling state! endof
+      KEY.CALL1 of what's state.calling state! endof
     endcase
   then
 ;
@@ -228,6 +249,8 @@ MAIN-MENU-ITEMS MAIN-MENU s! menu-items
 \
 \ [-------MENU--------]
 
+: crs 0 do cr loop ;
+
 \ === Status bar ===
 
 : ui.status-bar  ( pos-x pos-y -- )
@@ -293,7 +316,7 @@ MAIN-MENU-ITEMS MAIN-MENU s! menu-items
 
 : ui.notifications  ( pox-x pos-y -- )
   2drop
-  12 0 do cr loop
+  12 crs
 ;
 
 \ === Menu ===
@@ -336,7 +359,7 @@ what's state.alarms            , 4  , 12 ,
 what's state.alarms.edit       , 13 , 14 ,
 17 3 addr-array MENU-STATES
 
-: ui.menu  ( pos-x pos-y -- )
+: ui.menubar  ( pos-x pos-y -- )
   COLOR-PRIMARY -rot
   SCREEN-TILE-W 1 draw.fill-tiles
 
@@ -362,27 +385,41 @@ what's state.alarms.edit       , 13 , 14 ,
 
 : ui.unlock  ( -- )
   PASSWORD-INPUT input.count cr type
+  17 crs
+;
+
+: ui.menu
+  MAIN-MENU menu.show
+  14 crs
 ;
 
 : ui.call  ( -- )
   NUMBER-INPUT input.count cr type
+  17 crs
 ;
 
 : ui.calling  ( -- )
   cr ." Calling "
   NUMBER-INPUT input.count type
+  17 crs
 ;
 
 : ui.messages  ( -- )
   cr ." No messages"
+  17 crs
 ;
 
 : ui.contacts  ( -- )
-  cr ." No contacts"
+  CONTACT-LIST contacts.count 0 do
+    i CONTACT-LIST contacts.idx
+    contact.show
+  loop
+  14 crs
 ;
 
 : ui.alarms  ( -- )
   cr ." No alarms"
+  17 crs
 ;
 
 : ui.render  ( -- )
@@ -390,18 +427,18 @@ what's state.alarms.edit       , 13 , 14 ,
   what's CURRENT-STATE
   case
     what's state.dash.locked of ui.dash endof
-    what's state.dash.unlock of ui.dash ui.unlock endof
-    what's state.dash.unlock.write of ui.dash ui.unlock endof
+    what's state.dash.unlock of ui.unlock endof
+    what's state.dash.unlock.write of ui.unlock endof
     what's state.dash of ui.dash endof
-    what's state.menu of MAIN-MENU menu.show endof
+    what's state.menu of ui.menu endof
     what's state.call of ui.call endof
     what's state.call.write of ui.call endof
     what's state.calling of ui.calling endof
     what's state.messages of ui.messages endof
     what's state.contacts of ui.contacts endof
-    what's state.alarms of ui.dash ui.alarms endof
+    what's state.alarms of ui.alarms endof
   endcase
-  0 19 ui.menu
+  0 19 ui.menubar
 ;
 
 : ui.show  ( key -- )

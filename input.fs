@@ -88,3 +88,9 @@
   dup input.empty? not
   if input.cursor- else drop then
 ;
+
+: input.allot  ( len input -- )
+  here rot dup c, allot align
+  swap s! input-string
+;
+

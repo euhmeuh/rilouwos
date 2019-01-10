@@ -15,6 +15,10 @@
 : idx  ( addr idx -- addr ) cells + ;
 : idx@  ( addr idx -- value )  idx @ ;
 
+: relative  ( addr "name" -- )
+  create a, does> a@
+;
+
 \ Counted strings array
 
 : (cs-array)  ( index csarray -- str size )
