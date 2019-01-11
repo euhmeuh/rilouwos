@@ -9,7 +9,9 @@
 :struct menu
   ushort menu-cursor
   ushort menu-size
-  rptr   menu-items
+  \ following members are execution tokens
+  ulong  menu-show  ( index current? -- )
+  ulong  menu-go    ( index -- )
 ;struct
 
 : menu.cursor+  { a-menu -- }
@@ -24,21 +26,17 @@
   a-menu s! menu-cursor
 ;
 
-: menu.show  ( menu -- )
-  dup s@ menu-size
+: menu.show  { a-menu -- }
+  a-menu s@ menu-size
   0 do
-    cr
-    dup s@ menu-cursor i =
-    if ." > " then
-    i over s@ menu-items array-idx
-    1 idx $type
+    i dup
+    a-menu s@ menu-cursor =
+    a-menu s@ menu-show execute
   loop
-  drop
 ;
 
-: menu.go  ( menu -- defer )
+: menu.go  ( menu -- )
   dup s@ menu-cursor swap
-  s@ menu-items array-idx
-  0 idx@
+  s@ menu-go execute
 ;
 

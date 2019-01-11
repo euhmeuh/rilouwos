@@ -74,6 +74,7 @@ variable CURRENT-CONTACT
 \   - Alarms         [Back   Edit] [Cancel Save]
 
 menu MAIN-MENU
+menu CONTACTS-MENU
 
 defer CURRENT-STATE
 : state!  ( state-xt -- ) is CURRENT-STATE ;
@@ -155,7 +156,7 @@ defer state.alarms.edit
 :defer state.menu  ( key -- )
   case
     KEY.BACK of what's state.dash state! endof
-    KEY.OK of MAIN-MENU menu.go state! endof
+    KEY.OK of MAIN-MENU menu.go endof
     KEY.UP of MAIN-MENU menu.cursor- endof
     KEY.DOWN of MAIN-MENU menu.cursor+ endof
   endcase
@@ -211,6 +212,9 @@ defer state.alarms.edit
 :defer state.contacts  ( key -- )
   case
     KEY.BACK of what's state.menu state! endof
+    KEY.OK of CONTACTS-MENU menu.go endof
+    KEY.UP of CONTACTS-MENU menu.cursor- endof
+    KEY.DOWN of CONTACTS-MENU menu.cursor+ endof
   endcase
 ;
 
@@ -238,9 +242,36 @@ what's state.contacts , ," CONTACTS   "
 what's state.alarms   , ," ALARMS     "
 4 4 addr-array MAIN-MENU-ITEMS
 
-0 MAIN-MENU s! menu-cursor
+: ui.main-menu.show  ( index current? -- )
+  cr if ." > " then
+  MAIN-MENU-ITEMS array-idx
+  1 idx $type
+;
+
+: ui.main-menu.go  ( index -- )
+  MAIN-MENU-ITEMS array-idx
+  0 idx@ state!
+;
+
 4 MAIN-MENU s! menu-size
-MAIN-MENU-ITEMS MAIN-MENU s! menu-items
+' ui.main-menu.show MAIN-MENU s! menu-show
+' ui.main-menu.go MAIN-MENU s! menu-go
+
+\ === Contacts menu ===
+
+: ui.contacts-menu.show  ( index current? -- )
+  cr if ." > " then
+  CONTACT-LIST contacts.idx contact.show
+;
+
+: ui.contacts-menu.go  ( index -- )
+  CONTACT-LIST contacts.idx CURRENT-CONTACT !
+  what's state.contact state!
+;
+
+4 CONTACTS-MENU s! menu-size
+' ui.contacts-menu.show CONTACTS-MENU s! menu-show
+' ui.contacts-menu.go CONTACTS-MENU s! menu-go
 
 \ === Dashboard view ===
 
@@ -426,11 +457,14 @@ what's state.alarms.edit       , 13 , 14 ,
 ;
 
 : ui.contacts  ( -- )
-  CONTACT-LIST contacts.count 0 do
-    i CONTACT-LIST contacts.idx
-    contact.show
-  loop
+  CONTACTS-MENU menu.show
   14 crs
+;
+
+: ui.contact
+  cr
+  CURRENT-CONTACT @ contact.show
+  17 crs
 ;
 
 : ui.alarms  ( -- )
@@ -452,6 +486,7 @@ what's state.alarms.edit       , 13 , 14 ,
     what's state.calling of ui.calling endof
     what's state.messages of ui.messages endof
     what's state.contacts of ui.contacts endof
+    what's state.contact of ui.contact endof
     what's state.alarms of ui.alarms endof
   endcase
   0 19 ui.menubar

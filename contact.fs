@@ -27,7 +27,6 @@ $02 constant CONTACT-FLAG-DELETED
 : contact.number  13 cells + ;
 
 : contact.show  ( contact -- )
-  cr
   dup contact.name $type ."  "
   dup contact.desc $type ."  "
   contact.number $type
@@ -60,5 +59,5 @@ $02 constant CONTACT-FLAG-DELETED
     dup dup contacts.count 1+ swap !
     dup contacts.count 1- swap contacts.idx
   then
-  contact.reset
+  dup contact.reset
 ;
