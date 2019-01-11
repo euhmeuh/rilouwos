@@ -94,3 +94,10 @@
   swap s! input-string
 ;
 
+: input.save  ( dest input -- )
+  input.count ( dest orig len )
+  rot swap    ( orig dest len )
+  2dup swap c!
+  swap 1+ swap
+  cmove>
+;

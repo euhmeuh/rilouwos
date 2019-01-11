@@ -58,6 +58,8 @@ here
 252 CONTACT-LEN * allot \ free space
 relative CONTACT-LIST
 
+variable CURRENT-CONTACT
+
 \ === State machine ===
 
 \ User Interface:
@@ -171,6 +173,13 @@ defer state.alarms.edit
   then
 ;
 
+: ui.add-contact  ( -- )
+  CONTACT-LIST contacts.new
+  dup contact.number NUMBER-INPUT input.save
+  CURRENT-CONTACT a!
+  what's state.contact state!
+;
+
 :defer state.call.write  ( key -- )
   dup input.numeric-key?
   if NUMBER-INPUT input.append
@@ -181,6 +190,7 @@ defer state.alarms.edit
         input.empty?
         if what's state.call state! then
       endof
+      KEY.OK of ui.add-contact endof
       KEY.CALL1 of what's state.calling state! endof
     endcase
   then
@@ -201,6 +211,12 @@ defer state.alarms.edit
 :defer state.contacts  ( key -- )
   case
     KEY.BACK of what's state.menu state! endof
+  endcase
+;
+
+:defer state.contact  ( key -- )
+  case
+    KEY.BACK of what's state.contacts state! endof
   endcase
 ;
 

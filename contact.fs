@@ -26,12 +26,6 @@ $02 constant CONTACT-FLAG-DELETED
 : contact.desc  7 cells + ;
 : contact.number  13 cells + ;
 
-: contacts.idx ( idx contact-list -- contact )
-  2dup @ >= if abort" Index out of bound" then
-  cell+ swap CONTACT-LEN * +
-;
-: contacts.count ( contact-list -- len ) @ ;
-
 : contact.show  ( contact -- )
   cr
   dup contact.name $type ."  "
@@ -39,3 +33,32 @@ $02 constant CONTACT-FLAG-DELETED
   contact.number $type
 ;
 
+: contact.reset  ( contact -- )
+  dup 0 swap ! cell+
+  dup 0 swap c! 6 cells +
+  dup 0 swap c! 6 cells +
+  0 swap c!
+;
+
+\ === Contact list ===
+
+: contacts.idx ( idx contact-list -- contact )
+  2dup @ >= if abort" Index out of bound" then
+  cell+ swap CONTACT-LEN * +
+;
+
+: contacts.count ( contact-list -- len ) @ ;
+
+: contacts.new  ( contact-list -- contact )
+  dup contacts.count 0 do
+    dup i swap contacts.idx
+    dup contact.deleted?
+    if nip 0 leave else drop then
+  loop
+  ?dup if \ we didn't find any deleted free space
+    ( contact-list -- )
+    dup dup contacts.count 1+ swap !
+    dup contacts.count 1- swap contacts.idx
+  then
+  contact.reset
+;
