@@ -177,7 +177,7 @@ defer state.alarms.edit
 : ui.add-contact  ( -- )
   CONTACT-LIST contacts.new
   dup contact.number NUMBER-INPUT input.save
-  CURRENT-CONTACT a!
+  CURRENT-CONTACT !
   what's state.contact state!
 ;
 
@@ -234,13 +234,16 @@ what's state.dash.locked state!
 
 \ === Main menu ===
 
+variable MAIN-MENU-LEN
+4 MAIN-MENU-LEN !
+
 here
 \ 1 CELL                \ 3 CELLS
 what's state.call     , ," CALL       "
 what's state.messages , ," MESSAGES   "
 what's state.contacts , ," CONTACTS   "
 what's state.alarms   , ," ALARMS     "
-4 4 addr-array MAIN-MENU-ITEMS
+MAIN-MENU-LEN @ 4 addr-array MAIN-MENU-ITEMS
 
 : ui.main-menu.show  ( index current? -- )
   cr if ." > " then
@@ -254,6 +257,7 @@ what's state.alarms   , ," ALARMS     "
 ;
 
 4 MAIN-MENU s! menu-size
+MAIN-MENU-LEN MAIN-MENU s! menu-count
 ' ui.main-menu.show MAIN-MENU s! menu-show
 ' ui.main-menu.go MAIN-MENU s! menu-go
 
@@ -269,7 +273,8 @@ what's state.alarms   , ," ALARMS     "
   what's state.contact state!
 ;
 
-4 CONTACTS-MENU s! menu-size
+17 CONTACTS-MENU s! menu-size
+CONTACT-LIST CONTACTS-MENU s! menu-count
 ' ui.contacts-menu.show CONTACTS-MENU s! menu-show
 ' ui.contacts-menu.go CONTACTS-MENU s! menu-go
 

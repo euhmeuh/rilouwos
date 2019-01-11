@@ -7,8 +7,9 @@
 \ Move in a menu
 
 :struct menu
-  ushort menu-cursor
-  ushort menu-size
+  ushort menu-cursor \ current position
+  ushort menu-size   \ max displayed items
+  rptr   menu-count  \ addr to #items
   \ following members are execution tokens
   ulong  menu-show  ( index current? -- )
   ulong  menu-go    ( index -- )
@@ -16,18 +17,20 @@
 
 : menu.cursor+  { a-menu -- }
   a-menu s@ menu-cursor 1+
-  a-menu s@ menu-size mod
+  a-menu s@ menu-count @ mod
   a-menu s! menu-cursor
 ;
 
 : menu.cursor-  { a-menu -- }
   a-menu s@ menu-cursor
-  a-menu s@ menu-size tuck 1- + swap mod
+  a-menu s@ menu-count @ tuck 1- + swap mod
   a-menu s! menu-cursor
 ;
 
 : menu.show  { a-menu -- }
   a-menu s@ menu-size
+  a-menu s@ menu-count @
+  min
   0 do
     i dup
     a-menu s@ menu-cursor =
