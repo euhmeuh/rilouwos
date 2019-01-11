@@ -27,11 +27,21 @@
   a-menu s! menu-cursor
 ;
 
-: menu.show  { a-menu -- }
-  a-menu s@ menu-size
+: menu.range  { a-menu -- end start }
+  a-menu s@ menu-cursor
+  a-menu s@ menu-size 2/ -
   a-menu s@ menu-count @
-  min
-  0 do
+  a-menu s@ menu-size -
+  min 0 max
+  dup
+  a-menu s@ menu-size +
+  a-menu s@ menu-count @ min
+  swap
+;
+
+: menu.show  { a-menu -- }
+  a-menu menu.range
+  do
     i dup
     a-menu s@ menu-cursor =
     a-menu s@ menu-show execute

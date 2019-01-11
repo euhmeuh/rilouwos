@@ -38,7 +38,7 @@ input NUMBER-INPUT
 CONTACT-NUMBER-LEN NUMBER-INPUT input.allot
 
 here
-4 ,
+20 ,
 %00000001 ,
 ," Clara"       4 cells allot
 ," <3"          5 cells allot
@@ -54,8 +54,72 @@ here
 %00000000 ,
 ," John Doe"     3 cells allot
 ," Some guy"     3 cells allot
-," +33628406957" 2 cells allot
-252 CONTACT-LEN * allot \ free space
+," +00000000001" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000002" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000003" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000004" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000005" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000006" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000007" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000008" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000009" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000010" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000011" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000012" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000013" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000014" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000015" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000016" 2 cells allot
+%00000000 ,
+," John Doe"     3 cells allot
+," Some guy"     3 cells allot
+," +00000000017" 2 cells allot
+236 CONTACT-LEN * allot \ free space
 relative CONTACT-LIST
 
 variable CURRENT-CONTACT
@@ -273,7 +337,7 @@ MAIN-MENU-LEN MAIN-MENU s! menu-count
   what's state.contact state!
 ;
 
-17 CONTACTS-MENU s! menu-size
+18 CONTACTS-MENU s! menu-size
 CONTACT-LIST CONTACTS-MENU s! menu-count
 ' ui.contacts-menu.show CONTACTS-MENU s! menu-show
 ' ui.contacts-menu.go CONTACTS-MENU s! menu-go
@@ -463,7 +527,6 @@ what's state.alarms.edit       , 13 , 14 ,
 
 : ui.contacts  ( -- )
   CONTACTS-MENU menu.show
-  14 crs
 ;
 
 : ui.contact
