@@ -7,6 +7,7 @@
 : fail ."  FAIL" cr abort ;
 : should.be.true  if ok else fail then ;
 : should.be.false  not should.be.true ;
+: should.be.zero  should.be.false ;
 : should.be.0<  0< should.be.true ;
 : should.be.0>  0> should.be.true ;
 
@@ -20,8 +21,7 @@ input.mode.NUM
 '3' MY-INPUT input.append
 '4' MY-INPUT input.append
 '5' MY-INPUT input.append
-MY-INPUT input.count s" 1234" compare
-should.be.false
+MY-INPUT input.count s" 1234" compare should.be.zero
 MY-INPUT input.reset
 
 ." CLASSIC mode should append letters"
@@ -33,7 +33,21 @@ input.mode.CLASSIC
 '9' MY-INPUT input.append
 '9' MY-INPUT input.append
 '9' MY-INPUT input.append
-MY-INPUT input.count s" hey" compare
-should.be.false
+MY-INPUT input.count s" hey" compare should.be.zero
+MY-INPUT input.reset
+
+." CLASSIC mode should rotate through letters"
+input.mode.CLASSIC
+'2' MY-INPUT input.append
+MY-INPUT input.count s" a" compare
+'2' MY-INPUT input.append
+MY-INPUT input.count s" b" compare or
+'2' MY-INPUT input.append
+MY-INPUT input.count s" c" compare or
+'2' MY-INPUT input.append
+MY-INPUT input.count s" 2" compare or
+'2' MY-INPUT input.append
+MY-INPUT input.count s" a" compare or
+should.be.zero
 MY-INPUT input.reset
 

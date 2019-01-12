@@ -64,6 +64,8 @@ KEY.9WXYZ , ," wxyz9"
 KEY.0SP   , ,"  ,.:?!0"
 10 3 addr-array ALPHA-TABLE
 
+: input.alpha.force-new  ALPHA-LAST-KEY off ;
+
 : input.alpha  ( num-key -- char replace? )
   dup ALPHA-TABLE array-find if abort then
   1 idx
@@ -108,7 +110,7 @@ KEY.0SP   , ,"  ,.:?!0"
 ;
 
 : input.cursor-  ( input -- )
-  dup s@ input-cursor 1-
+  dup s@ input-cursor 1- 0 max
   swap s! input-cursor
 ;
 
@@ -126,16 +128,20 @@ KEY.0SP   , ,"  ,.:?!0"
 
 : input.append  { a-key an-input -- }
   a-key input.numeric-key?
-  an-input (input.can-append?)
-  and if
+  if
     INPUT-MODE @
     case
       INPUT-MODE-NUM of
-        a-key an-input (input.append-char)
+        an-input (input.can-append?)
+        if a-key an-input (input.append-char) then
       endof
       INPUT-MODE-CLASSIC of
-        a-key input.alpha
-        if an-input input.cursor- then
+        a-key input.alpha ( char replace? )
+        if an-input input.cursor-
+        else
+          an-input (input.can-append?)
+          not if drop exit then
+        then
         an-input (input.append-char)
       endof
     endcase
