@@ -205,8 +205,9 @@ defer state.alarms.edit
 
 : ui.save-contact  ( -- )
   CONTACT-MENU s@ menu-cursor
-  ui.contact-menu.field? throw
+  ui.contact-menu.field? ?dup not if abort then
   CONTACT-EDIT-INPUT input.save
+  CONTACT-EDIT-INPUT input.reset
   what's state.contact state!
 ;
 
@@ -306,6 +307,12 @@ defer state.alarms.edit
   endcase
 ;
 
+:defer state.discussion  ( key -- )
+  case
+    KEY.BACK of what's state.messages state! endof
+  endcase
+;
+
 :defer state.contacts  ( key -- )
   case
     KEY.BACK of what's state.menu state! endof
@@ -325,10 +332,14 @@ defer state.alarms.edit
 ;
 
 :defer state.contact.edit  ( key -- )
-  case
-    KEY.BACK of what's state.contact state! endof
-    KEY.OK of ui.save-contact endof
-  endcase
+  dup input.numeric-key?
+  if CONTACT-EDIT-INPUT input.append
+  else
+    case
+      KEY.BACK of what's state.contact state! endof
+      KEY.OK of ui.save-contact endof
+    endcase
+  then
 ;
 
 :defer state.alarms  ( key -- )
@@ -395,11 +406,17 @@ here
 ," MESSAGES   "
 2 3 addr-array CONTACT-MENU-ITEMS
 
-: ui.contact-menu.show  ( index current? -- )
-  cr if ." > " then
-  dup ui.contact-menu.field?
-  ?dup if $type drop else
-    CONTACT-MENU-ITEMS array-idx $type
+: ui.contact-menu.show  { index current? -- }
+  cr current? if ." > " then
+  index ui.contact-menu.field?
+  ?dup if
+    what's CURRENT-STATE
+    what's state.contact.edit =
+    current? and
+    if drop CONTACT-EDIT-INPUT input.count type
+    else $type then
+  else
+    index CONTACT-MENU-ITEMS array-idx $type
   then
 ;
 
@@ -407,12 +424,13 @@ here
   dup ui.contact-menu.field?
   if
     drop what's state.contact.edit state!
+    CONTACT-EDIT-INPUT input.reset
   else
     case
       CONTACT-MENU-CALL of
         what's state.calling state! endof
       CONTACT-MENU-MESSAGES of
-        what's state.discussion.write state! endof
+        what's state.discussion state! endof
     endcase
   then
 ;
@@ -614,11 +632,6 @@ what's state.alarms.edit       , 13 , 14 ,
   13 crs
 ;
 
-: ui.contact.edit
-  CONTACT-MENU menu.show
-  13 crs
-;
-
 : ui.alarms  ( -- )
   cr ." No alarms"
   17 crs
@@ -639,7 +652,7 @@ what's state.alarms.edit       , 13 , 14 ,
     what's state.messages of ui.messages endof
     what's state.contacts of ui.contacts endof
     what's state.contact of ui.contact endof
-    what's state.contact.edit of ui.contact.edit endof
+    what's state.contact.edit of ui.contact endof
     what's state.alarms of ui.alarms endof
   endcase
   0 19 ui.menubar
