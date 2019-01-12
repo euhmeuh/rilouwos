@@ -15,38 +15,35 @@ input MY-INPUT
 4 MY-INPUT input.allot
 
 ." NUM mode should append numbers"
-input.mode.NUM
-'1' MY-INPUT input.append
-'2' MY-INPUT input.append
-'3' MY-INPUT input.append
-'4' MY-INPUT input.append
-'5' MY-INPUT input.append
+'1' MY-INPUT INPUT-NUM input.append
+'2' MY-INPUT INPUT-NUM input.append
+'3' MY-INPUT INPUT-NUM input.append
+'4' MY-INPUT INPUT-NUM input.append
+'5' MY-INPUT INPUT-NUM input.append
 MY-INPUT input.count s" 1234" compare should.be.zero
 MY-INPUT input.reset
 
 ." CLASSIC mode should append letters"
-input.mode.CLASSIC
-'4' MY-INPUT input.append
-'4' MY-INPUT input.append
-'3' MY-INPUT input.append
-'3' MY-INPUT input.append
-'9' MY-INPUT input.append
-'9' MY-INPUT input.append
-'9' MY-INPUT input.append
+'4' MY-INPUT INPUT-CLASSIC input.append
+'4' MY-INPUT INPUT-CLASSIC input.append
+'3' MY-INPUT INPUT-CLASSIC input.append
+'3' MY-INPUT INPUT-CLASSIC input.append
+'9' MY-INPUT INPUT-CLASSIC input.append
+'9' MY-INPUT INPUT-CLASSIC input.append
+'9' MY-INPUT INPUT-CLASSIC input.append
 MY-INPUT input.count s" hey" compare should.be.zero
 MY-INPUT input.reset
 
 ." CLASSIC mode should rotate through letters"
-input.mode.CLASSIC
-'2' MY-INPUT input.append
+'2' MY-INPUT INPUT-CLASSIC input.append
 MY-INPUT input.count s" a" compare
-'2' MY-INPUT input.append
+'2' MY-INPUT INPUT-CLASSIC input.append
 MY-INPUT input.count s" b" compare or
-'2' MY-INPUT input.append
+'2' MY-INPUT INPUT-CLASSIC input.append
 MY-INPUT input.count s" c" compare or
-'2' MY-INPUT input.append
+'2' MY-INPUT INPUT-CLASSIC input.append
 MY-INPUT input.count s" 2" compare or
-'2' MY-INPUT input.append
+'2' MY-INPUT INPUT-CLASSIC input.append
 MY-INPUT input.count s" a" compare or
 should.be.zero
 MY-INPUT input.reset

@@ -39,14 +39,9 @@
 '0' constant KEY.0SP
 '*' constant KEY.STAR
 
-variable INPUT-MODE
-0 constant INPUT-MODE-NUM
-1 constant INPUT-MODE-CLASSIC
-2 constant INPUT-MODE-DICT
-
-: input.mode.NUM      INPUT-MODE-NUM INPUT-MODE ! ;
-: input.mode.CLASSIC  INPUT-MODE-CLASSIC INPUT-MODE ! ;
-: input.mode.DICT     INPUT-MODE-DICT INPUT-MODE ! ;
+0 constant INPUT-NUM
+1 constant INPUT-CLASSIC
+2 constant INPUT-DICT
 
 variable ALPHA-LAST-KEY
 variable ALPHA-CURSOR
@@ -126,16 +121,16 @@ KEY.0SP   , ,"  ,.:?!0"
   input.cursor+
 ;
 
-: input.append  { a-key an-input -- }
+: input.append  { a-key an-input mode -- }
   a-key input.numeric-key?
   if
-    INPUT-MODE @
+    mode
     case
-      INPUT-MODE-NUM of
+      INPUT-NUM of
         an-input (input.can-append?)
         if a-key an-input (input.append-char) then
       endof
-      INPUT-MODE-CLASSIC of
+      INPUT-CLASSIC of
         a-key input.alpha ( char replace? )
         if an-input input.cursor-
         else

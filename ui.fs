@@ -227,7 +227,7 @@ defer state.alarms.edit
 :defer state.dash.unlock  ( key -- )
   dup input.numeric-key?
   if
-    PASSWORD-INPUT input.append
+    PASSWORD-INPUT INPUT-NUM input.append
     what's state.dash.unlock.write state!
   else
     case
@@ -238,7 +238,7 @@ defer state.alarms.edit
 
 :defer state.dash.unlock.write  ( key -- )
   dup input.numeric-key?
-  if PASSWORD-INPUT input.append
+  if PASSWORD-INPUT INPUT-NUM input.append
   else
     case
       KEY.BACK of
@@ -270,7 +270,7 @@ defer state.alarms.edit
 :defer state.call  ( key -- )
   dup input.numeric-key?
   if
-    NUMBER-INPUT input.append
+    NUMBER-INPUT INPUT-NUM input.append
     what's state.call.write state!
   else
     case
@@ -281,7 +281,7 @@ defer state.alarms.edit
 
 :defer state.call.write  ( key -- )
   dup input.numeric-key?
-  if NUMBER-INPUT input.append
+  if NUMBER-INPUT INPUT-NUM input.append
   else
     case
       KEY.BACK of
@@ -333,7 +333,7 @@ defer state.alarms.edit
 
 :defer state.contact.edit  ( key -- )
   dup input.numeric-key?
-  if CONTACT-EDIT-INPUT input.append
+  if CONTACT-EDIT-INPUT INPUT-CLASSIC input.append
   else
     case
       KEY.BACK of what's state.contact state! endof
