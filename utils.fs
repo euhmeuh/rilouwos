@@ -11,6 +11,8 @@
 : 3rd  ( a b c -- a )  2drop ;
 
 : int->str  ( int -- str size ) s>d <# #s #> ;
+: str.size  c@ ;
+: str.start 1+ ;
 
 : idx  ( addr idx -- addr ) cells + ;
 : idx@  ( addr idx -- value )  idx @ ;
@@ -18,6 +20,9 @@
 : relative  ( addr "name" -- )
   create a, does> a@
 ;
+
+: @1+!  ( addr -- )  dup @ 1+ swap ! ;
+: @1-!  ( addr -- )  dup @ 1- swap ! ;
 
 \ Counted strings array
 

@@ -39,6 +39,49 @@
 '0' constant KEY.0SP
 '*' constant KEY.STAR
 
+variable INPUT-MODE
+0 constant INPUT-MODE-NUM
+1 constant INPUT-MODE-CLASSIC
+2 constant INPUT-MODE-DICT
+
+: input.mode.NUM      INPUT-MODE-NUM INPUT-MODE ! ;
+: input.mode.CLASSIC  INPUT-MODE-CLASSIC INPUT-MODE ! ;
+: input.mode.DICT     INPUT-MODE-DICT INPUT-MODE ! ;
+
+variable ALPHA-LAST-KEY
+variable ALPHA-CURSOR
+
+here
+KEY.1REC  , ," 1111"
+KEY.2ABC  , ," abc2"
+KEY.3DEF  , ," def3"
+KEY.4GHI  , ," ghi4"
+KEY.5JKL  , ," jkl5"
+KEY.6MNO  , ," mno6"
+KEY.7PQRS , ," pqrs7"
+KEY.8TUV  , ," tuv8"
+KEY.9WXYZ , ," wxyz9"
+KEY.0SP   , ,"  ,.:?!0"
+10 3 addr-array ALPHA-TABLE
+
+: input.alpha  ( num-key -- char replace? )
+  dup ALPHA-TABLE array-find if abort then
+  1 idx
+  over ALPHA-LAST-KEY @ =
+  if ( key addr )
+    ALPHA-CURSOR @1+!
+    ALPHA-CURSOR @
+    over str.size <
+    if ALPHA-CURSOR @ +
+    else 0 ALPHA-CURSOR ! then
+    str.start c@ true
+  else
+    0 ALPHA-CURSOR !
+    str.start c@ false
+  then ( key char bool )
+  rot ALPHA-LAST-KEY !
+;
+
 : input.numeric-key?  ( key -- bool )
   dup '0' >= swap '9' <= and
 ;
@@ -69,19 +112,34 @@
   swap s! input-cursor
 ;
 
-: input.append  ( key input -- )
-  over input.numeric-key?
-  if
-    dup s@ input-cursor
-    over s@ input-string
-    2dup c@ <
-    if ( key input cursor string )
-      1+ + rot ( input addr key )
-      swap c! input.cursor+
-    else
-      2drop 2drop
-    then
-  else 2drop then
+: (input.can-append?)  ( input -- bool )
+  dup s@ input-cursor
+  swap s@ input-string c@ <
+;
+
+: (input.append-char)  ( char input -- )
+  dup dup s@ input-string 1+
+  swap s@ input-cursor +
+  rot swap c!
+  input.cursor+
+;
+
+: input.append  { a-key an-input -- }
+  a-key input.numeric-key?
+  an-input (input.can-append?)
+  and if
+    INPUT-MODE @
+    case
+      INPUT-MODE-NUM of
+        a-key an-input (input.append-char)
+      endof
+      INPUT-MODE-CLASSIC of
+        a-key input.alpha
+        if an-input input.cursor- then
+        an-input (input.append-char)
+      endof
+    endcase
+  then
 ;
 
 : input.erase  ( input -- )
