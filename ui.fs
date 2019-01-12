@@ -35,7 +35,10 @@ input PASSWORD-INPUT
 PASSWORD-LEN PASSWORD-INPUT input.allot
 
 input NUMBER-INPUT
-CONTACT-NUMBER-LEN NUMBER-INPUT input.allot
+CONTACT-FIELD-LEN NUMBER-INPUT input.allot
+
+input CONTACT-EDIT-INPUT
+CONTACT-FIELD-LEN CONTACT-EDIT-INPUT input.allot
 
 here
 20 ,
@@ -139,6 +142,26 @@ variable CURRENT-CONTACT
 
 menu MAIN-MENU
 menu CONTACTS-MENU
+menu CONTACT-MENU
+
+0 constant CONTACT-MENU-CALL
+1 constant CONTACT-MENU-MESSAGES
+2 constant CONTACT-MENU-NAME
+3 constant CONTACT-MENU-DESC
+4 constant CONTACT-MENU-NUMBER
+
+: ui.contact-menu.field?  ( idx -- addr|false )
+  false swap
+  case
+    CONTACT-MENU-NAME of
+      CURRENT-CONTACT @ contact.name endof
+    CONTACT-MENU-DESC of
+      CURRENT-CONTACT @ contact.desc endof
+    CONTACT-MENU-NUMBER of
+      CURRENT-CONTACT @ contact.number endof
+  endcase
+  dup if nip then
+;
 
 defer CURRENT-STATE
 : state!  ( state-xt -- ) is CURRENT-STATE ;
@@ -161,17 +184,7 @@ defer state.contact.edit
 defer state.alarms
 defer state.alarms.edit
 
-\ Small macro to ease definition of defer
-\ Instead of      :noname ... ; is name
-\ you can write   :defer name ... ;
-: :defer align here code> postpone is ] ;
-
-
-:defer state.dash.locked  ( key -- )
-  case
-    KEY.BACK of what's state.dash.unlock state! endof
-  endcase
-;
+\ === Special transitions ===
 
 : ui.check-password  ( -- state-xt )
   SETTINGS.PASSWORD count
@@ -181,6 +194,33 @@ defer state.alarms.edit
   else what's state.dash.locked
   then
   PASSWORD-INPUT input.reset
+;
+
+: ui.add-contact  ( -- )
+  CONTACT-LIST contacts.new
+  dup contact.number NUMBER-INPUT input.save
+  CURRENT-CONTACT !
+  what's state.contact state!
+;
+
+: ui.save-contact  ( -- )
+  CONTACT-MENU s@ menu-cursor
+  ui.contact-menu.field? throw
+  CONTACT-EDIT-INPUT input.save
+  what's state.contact state!
+;
+
+\ === States implementation ===
+
+\ Small macro to ease definition of defer
+\ Instead of      :noname ... ; is name
+\ you can write   :defer name ... ;
+: :defer align here code> postpone is ] ;
+
+:defer state.dash.locked  ( key -- )
+  case
+    KEY.BACK of what's state.dash.unlock state! endof
+  endcase
 ;
 
 :defer state.dash.unlock  ( key -- )
@@ -238,13 +278,6 @@ defer state.alarms.edit
   then
 ;
 
-: ui.add-contact  ( -- )
-  CONTACT-LIST contacts.new
-  dup contact.number NUMBER-INPUT input.save
-  CURRENT-CONTACT !
-  what's state.contact state!
-;
-
 :defer state.call.write  ( key -- )
   dup input.numeric-key?
   if NUMBER-INPUT input.append
@@ -285,6 +318,16 @@ defer state.alarms.edit
 :defer state.contact  ( key -- )
   case
     KEY.BACK of what's state.contacts state! endof
+    KEY.OK of CONTACT-MENU menu.go endof
+    KEY.UP of CONTACT-MENU menu.cursor- endof
+    KEY.DOWN of CONTACT-MENU menu.cursor+ endof
+  endcase
+;
+
+:defer state.contact.edit  ( key -- )
+  case
+    KEY.BACK of what's state.contact state! endof
+    KEY.OK of ui.save-contact endof
   endcase
 ;
 
@@ -320,7 +363,7 @@ MAIN-MENU-LEN @ 4 addr-array MAIN-MENU-ITEMS
   0 idx@ state!
 ;
 
-4 MAIN-MENU s! menu-size
+MAIN-MENU-LEN @ MAIN-MENU s! menu-size
 MAIN-MENU-LEN MAIN-MENU s! menu-count
 ' ui.main-menu.show MAIN-MENU s! menu-show
 ' ui.main-menu.go MAIN-MENU s! menu-go
@@ -341,6 +384,43 @@ MAIN-MENU-LEN MAIN-MENU s! menu-count
 CONTACT-LIST CONTACTS-MENU s! menu-count
 ' ui.contacts-menu.show CONTACTS-MENU s! menu-show
 ' ui.contacts-menu.go CONTACTS-MENU s! menu-go
+
+\ === Contact menu ===
+
+variable CONTACT-MENU-LEN
+5 CONTACT-MENU-LEN !
+
+here
+," CALL       "
+," MESSAGES   "
+2 3 addr-array CONTACT-MENU-ITEMS
+
+: ui.contact-menu.show  ( index current? -- )
+  cr if ." > " then
+  dup ui.contact-menu.field?
+  ?dup if $type drop else
+    CONTACT-MENU-ITEMS array-idx $type
+  then
+;
+
+: ui.contact-menu.go  ( index -- )
+  dup ui.contact-menu.field?
+  if
+    drop what's state.contact.edit state!
+  else
+    case
+      CONTACT-MENU-CALL of
+        what's state.calling state! endof
+      CONTACT-MENU-MESSAGES of
+        what's state.discussion.write state! endof
+    endcase
+  then
+;
+
+5 CONTACT-MENU s! menu-size
+CONTACT-MENU-LEN CONTACT-MENU s! menu-count
+' ui.contact-menu.show CONTACT-MENU s! menu-show
+' ui.contact-menu.go CONTACT-MENU s! menu-go
 
 \ === Dashboard view ===
 
@@ -530,9 +610,13 @@ what's state.alarms.edit       , 13 , 14 ,
 ;
 
 : ui.contact
-  cr
-  CURRENT-CONTACT @ contact.show
-  17 crs
+  CONTACT-MENU menu.show
+  13 crs
+;
+
+: ui.contact.edit
+  CONTACT-MENU menu.show
+  13 crs
 ;
 
 : ui.alarms  ( -- )
@@ -555,6 +639,7 @@ what's state.alarms.edit       , 13 , 14 ,
     what's state.messages of ui.messages endof
     what's state.contacts of ui.contacts endof
     what's state.contact of ui.contact endof
+    what's state.contact.edit of ui.contact.edit endof
     what's state.alarms of ui.alarms endof
   endcase
   0 19 ui.menubar

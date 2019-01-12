@@ -6,9 +6,7 @@
 \ === Contact ===
 \ Manipulate contacts
 
-21 constant CONTACT-NAME-LEN
-21 constant CONTACT-DESC-LEN
-21 constant CONTACT-NUMBER-LEN
+21 constant CONTACT-FIELD-LEN
 $01 constant CONTACT-FLAG-FAVORITE
 $02 constant CONTACT-FLAG-DELETED
 
