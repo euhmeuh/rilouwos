@@ -39,12 +39,16 @@
 '0' constant KEY.0SP
 '*' constant KEY.STAR
 
+: input.numeric?  '0' '9' between ;
+: input.alpha?  'a' 'z' between ;
+
 0 constant INPUT-NUM
 1 constant INPUT-CLASSIC
 2 constant INPUT-DICT
 
 variable ALPHA-LAST-KEY
 variable ALPHA-CURSOR
+variable ALPHA-CAPS
 
 here
 KEY.1REC  , ," 1111"
@@ -60,6 +64,13 @@ KEY.0SP   , ,"  ,.:?!0"
 10 3 addr-array ALPHA-TABLE
 
 : input.alpha.force-new  ALPHA-LAST-KEY off ;
+: input.alpha.toggle-caps  ALPHA-CAPS toggle ;
+
+: ?caps  ( char -- char )
+  dup input.alpha?
+  ALPHA-CAPS @ and
+  if 32 - then
+;
 
 : input.alpha  ( num-key -- char replace? )
   dup ALPHA-TABLE array-find if abort then
@@ -71,16 +82,12 @@ KEY.0SP   , ,"  ,.:?!0"
     over str.size <
     if ALPHA-CURSOR @ +
     else 0 ALPHA-CURSOR ! then
-    str.start c@ true
+    str.start c@ ?caps true
   else
     0 ALPHA-CURSOR !
-    str.start c@ false
+    str.start c@ ?caps false
   then ( key char bool )
   rot ALPHA-LAST-KEY !
-;
-
-: input.numeric-key?  ( key -- bool )
-  dup '0' >= swap '9' <= and
 ;
 
 :struct input
@@ -122,7 +129,7 @@ KEY.0SP   , ,"  ,.:?!0"
 ;
 
 : input.append  { a-key an-input mode -- }
-  a-key input.numeric-key?
+  a-key input.numeric?
   if
     mode
     case
@@ -160,3 +167,4 @@ KEY.0SP   , ,"  ,.:?!0"
   swap 1+ swap
   cmove>
 ;
+

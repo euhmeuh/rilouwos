@@ -225,30 +225,26 @@ defer state.alarms.edit
 ;
 
 :defer state.dash.unlock  ( key -- )
-  dup input.numeric-key?
-  if
-    PASSWORD-INPUT INPUT-NUM input.append
-    what's state.dash.unlock.write state!
-  else
-    case
-      KEY.BACK of what's state.dash.locked state! endof
-    endcase
-  then
+  case
+    KEY.BACK of what's state.dash.locked state! endof
+    dup input.numeric?
+    if
+      dup PASSWORD-INPUT INPUT-NUM input.append
+      what's state.dash.unlock.write state!
+    then
+  endcase
 ;
 
 :defer state.dash.unlock.write  ( key -- )
-  dup input.numeric-key?
-  if PASSWORD-INPUT INPUT-NUM input.append
-  else
-    case
-      KEY.BACK of
-        PASSWORD-INPUT dup input.erase
-        input.empty?
-        if what's state.dash.unlock state! then
-      endof
-      KEY.OK of ui.check-password state! endof
-    endcase
-  then
+  case
+    KEY.BACK of
+      PASSWORD-INPUT dup input.erase
+      input.empty?
+      if what's state.dash.unlock state! then
+    endof
+    KEY.OK of ui.check-password state! endof
+    dup PASSWORD-INPUT INPUT-NUM input.append
+  endcase
 ;
 
 :defer state.dash  ( key -- )
@@ -268,31 +264,27 @@ defer state.alarms.edit
 ;
 
 :defer state.call  ( key -- )
-  dup input.numeric-key?
-  if
-    NUMBER-INPUT INPUT-NUM input.append
-    what's state.call.write state!
-  else
-    case
-      KEY.BACK of what's state.menu state! endof
-    endcase
-  then
+  case
+    KEY.BACK of what's state.menu state! endof
+    dup input.numeric?
+    if
+      dup NUMBER-INPUT INPUT-NUM input.append
+      what's state.call.write state!
+    then
+  endcase
 ;
 
 :defer state.call.write  ( key -- )
-  dup input.numeric-key?
-  if NUMBER-INPUT INPUT-NUM input.append
-  else
-    case
-      KEY.BACK of
-        NUMBER-INPUT dup input.erase
-        input.empty?
-        if what's state.call state! then
-      endof
-      KEY.OK of ui.add-contact endof
-      KEY.CALL1 of what's state.calling state! endof
-    endcase
-  then
+  case
+    KEY.BACK of
+      NUMBER-INPUT dup input.erase
+      input.empty?
+      if what's state.call state! then
+    endof
+    KEY.OK of ui.add-contact endof
+    KEY.CALL1 of what's state.calling state! endof
+    dup NUMBER-INPUT INPUT-NUM input.append
+  endcase
 ;
 
 :defer state.calling  ( key -- )
@@ -332,14 +324,12 @@ defer state.alarms.edit
 ;
 
 :defer state.contact.edit  ( key -- )
-  dup input.numeric-key?
-  if CONTACT-EDIT-INPUT INPUT-CLASSIC input.append
-  else
-    case
-      KEY.BACK of what's state.contact state! endof
-      KEY.OK of ui.save-contact endof
-    endcase
-  then
+  case
+    KEY.BACK of what's state.contact state! endof
+    KEY.OK of ui.save-contact endof
+    KEY.1REC of input.alpha.toggle-caps endof
+    dup CONTACT-EDIT-INPUT INPUT-CLASSIC input.append
+  endcase
 ;
 
 :defer state.alarms  ( key -- )

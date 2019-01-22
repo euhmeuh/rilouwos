@@ -14,6 +14,8 @@
 : str.size  c@ ;
 : str.start 1+ ;
 
+: toggle  dup @ not swap ! ;
+
 : idx  ( addr idx -- addr ) cells + ;
 : idx@  ( addr idx -- value )  idx @ ;
 
