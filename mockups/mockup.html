@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>RilouwOS Mockups</title>
+    <link rel="stylesheet" type="text/css" href="../../rilouweb/rilouweb.css">
+    <style type="text/css">
+        html {
+            background-color: var(--fg);
+        }
+
+        html, body {
+            height: 100%;
+            margin-bottom: 0px;
+            padding: 0px;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        article {
+            padding: 12px;
+            display: none;
+            overflow-y: auto;
+        }
+
+        article.show {
+            display: block;
+            flex: 1;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .box-h {
+            display: flex;
+            flex-direction: row;
+            margin: 12px 0px;
+        }
+
+        .box-v {
+            display: flex;
+            flex-direction: column;
+            margin: 12px 0px;
+        }
+
+        .box-h > * { flex: 1; margin-right: 12px; }
+        .box-v > * { flex: 1; margin-bottom: 12px; }
+        .box-h > *:last-child { margin-right: 0px; }
+        .box-v > *:last-child { margin-bottom: 0px; }
+
+        hr {
+            border: none;
+            border-top: 1px dashed var(--accent);
+            max-width: 256px;
+            margin: 36px auto
+        }
+
+        #topbar {
+            height: 48px;
+            min-height: 48px;
+            background-color: var(--accent);
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            font-size: 1.3em;
+            padding-left: 12px;
+        }
+    </style>
+</head>
+<body>
+    <nav id="topbar">
+        <time>月 2020-02-10</time>
+    </nav>
+
+    <article id="home" class="show">
+        <h1>Home</h1>
+        <div class="box-v">
+            <button class="primary" type="button" onclick="trans('home', 'call')">Call</button>
+            <button class="primary" type="button" onclick="trans('home', 'history')">History</button>
+            <button class="primary" type="button" onclick="trans('home', 'conversations')">Conversations</button>
+            <button class="primary" type="button" onclick="trans('home', 'contacts')">Contacts</button>
+            <button class="primary" type="button" onclick="trans('home', 'alarms')">Alarms</button>
+            <button class="primary" type="button" onclick="trans('home', 'settings')">Settings</button>
+        </div>
+    </article>
+
+    <article id="call">
+        <h1>Call</h1>
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('call', 'home')">Back</button>
+        </div>
+    </article>
+
+    <article id="history">
+        <h1>History</h1>
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('history', 'home')">Back</button>
+        </div>
+    </article>
+
+    <article id="conversations">
+        <h1>Conversations</h1>
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('conversations', 'home')">Back</button>
+        </div>
+    </article>
+
+    <article id="contacts">
+        <h1>Contacts</h1>
+        <rilouw-list select="single" values='[
+          { "title": "Simon Punk (+33 1 23 45 67 89)", "desc": "Favorites, Friends" },
+          { "title": "Clara Love (+33 6 78 91 23 45)", "desc": "Favorites" },
+          { "title": "Pierre (+33 2 34 56 78 91)", "desc": "Favorites" },
+          { "title": "Mom (+33 4 56 78 91 23)", "desc": "Favorites" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" },
+          { "title": "Bob Bricoleur (+33 7 89 12 34 56)", "desc": "Friends" }
+        ]'></rilouw-list>
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('contacts', 'home')">Back</button>
+        </div>
+    </article>
+
+    <article id="contact">
+        <h1>Contact</h1>
+        <label>
+            <span class="label">Name</span>
+            <input type="text" name="name" value="Simon">
+        </label>
+        <label>
+            <span class="label">Surname</span>
+            <input type="text" name="surname" value="Punk">
+        </label>
+        <label>
+            <span class="label">Telephone</span>
+            <input type="text" name="tel" value="+33 1 23 45 67 89">
+        </label>
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('contact', 'contacts')">Back</button>
+            <button class="primary" disabled="" type="button">Save</button>
+        </div>
+        <hr>
+        <h2>Groups</h2>
+        <p class="box primary">Favorites, Friends</p>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('contact', 'groups')">Edit groups</button>
+        </div>
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button">Delete contact</button>
+        </div>
+    </article>
+
+    <article id="groups">
+        <h1>Groups for Simon Punk</h1>
+
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('groups', 'contact')">Cancel</button>
+            <button class="primary" disabled="" type="button">Save</button>
+        </div>
+    </article>
+
+    <article id="alarms">
+        <h1>Alarms</h1>
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('alarms', 'home')">Back</button>
+        </div>
+    </article>
+
+    <article id="settings">
+        <h1>Settings</h1>
+        <rilouw-checkbox checked="On" unchecked="Off" default-value="false">Plane mode</rilouw-checkbox>
+        <rilouw-checkbox checked="On" unchecked="Off" default-value="false">Wifi</rilouw-checkbox>
+        <rilouw-checkbox checked="On" unchecked="Off" default-value="false">Bluetooth</rilouw-checkbox>
+        <rilouw-selector values='{
+            "pumpkin": "Witch Pumpkin",
+            "grey": "Grey cat",
+            "green": "Green tea",
+            "pink": "Pink roses"
+          }'
+          default-value="pumpkin">Color theme</rilouw-selector>
+        <hr>
+        <div class="box-h">
+            <button class="secondary" type="button" onclick="trans('settings', 'home')">Back</button>
+        </div>
+    </article>
+
+    <script type="text/javascript" src="../../rilouweb/_.js"></script>
+    <script type="text/javascript" src="../../rilouweb/page.js"></script>
+    <script type="text/javascript" src="../../rilouweb/rilouweb.js"></script>
+    <script type="text/javascript">
+        Page.onload(() => {
+            Rilouweb.init();
+        });
+
+        function trans(prev, next) {
+            Page.get(`#${prev}`).classList.remove('show');
+            Page.get(`#${next}`).classList.add('show');
+        }
+    </script>
+</body>
+</html>
